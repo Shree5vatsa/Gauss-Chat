@@ -17,6 +17,8 @@ const chatSchema = new Schema<ChatDocument>({
         type: [Schema.Types.ObjectId],
         ref: "User",
         required: true,
+
+        //mongoose.Types.ObjectId[] gives the run time data
         validate: {
             validator: function (value: mongoose.Types.ObjectId[]) {
                 return value.length >= 2;
