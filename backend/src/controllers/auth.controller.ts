@@ -1,8 +1,8 @@
 import { HTTP_STATUS } from "../config/http.config";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
-import { registerService } from "../services/auth.service";
-import { setJwtAuthCookie } from "../utils/cookie";
-import { registerSchema } from "../validators/auth.validator";
+import { registerService,loginService } from "../services/auth.service";
+import { clearJwtAuthCookie, setJwtAuthCookie } from "../utils/cookie";
+import { loginSchema, registerSchema } from "../validators/auth.validator";
 import { Request, Response } from "express"; // Import both from express
 
 export const registerController = asyncHandler(
@@ -20,4 +20,42 @@ export const registerController = asyncHandler(
         user,
       });
   },
+);
+
+export const loginController = asyncHandler(
+    async (req: Request, res: Response) => {
+        const body = loginSchema.parse(req.body);
+
+        const user = await loginService(body);
+
+        const userId = user._id as unknown as string;
+
+        return (await setJwtAuthCookie({ res, userId }))
+            .status(HTTP_STATUS.OK)
+            .json({
+                message: "User logged in successfully",
+                user,
+            })
+    }
+)
+export const logoutController = asyncHandler(
+    async (req: Request, res: Response) => {
+        return (
+            await clearJwtAuthCookie(res)
+                .status(HTTP_STATUS.OK)
+                .json({
+                    message: "User logged out successfully",
+                })
+        );
+    }
+);
+
+export const authStatusController = asyncHandler(
+    async (req: Request, res: Response) => {
+        const user = req.user;
+        return res.status(HTTP_STATUS.OK).json({
+            message: "User fetched successfully",
+            user,
+        });
+    }
 );

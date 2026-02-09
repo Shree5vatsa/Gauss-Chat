@@ -13,7 +13,7 @@ type AsyncController = (
 export const asyncHandler = (controller: AsyncController) => 
     async (req: Request, res: Response, next: NextFunction) => { //express passes at call time
         try {
-            await controller(req, res, next);
+            return await controller(req, res, next);
         } catch (error) {
             next(error);
         }
