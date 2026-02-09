@@ -5,6 +5,10 @@ import cors from "cors";
 import { Env } from "./config/env.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import connectDB from "./config/database.config";
+import passport from "passport";
+import { HTTP_STATUS } from "./config/http.config";
+import { asyncHandler } from "./middlewares/asyncHandler.middleware";
+import router from "./routes";
 
 const app = express();
 
@@ -18,6 +22,18 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(passport.initialize());
+
+app.get(
+  "/health",
+  asyncHandler(async (req, res) => {
+    res.status(HTTP_STATUS.OK).json({ message: "Server is running" , status:"OK"});
+  })
+)
+
+app.use("/api", router);
+
 
 app.use(errorHandler);
 

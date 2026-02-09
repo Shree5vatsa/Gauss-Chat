@@ -16,7 +16,7 @@ passport.use(
       ]),
       secretOrKey: Env.JWT_SECRET,
       audience: ["user"],
-      algorithms: ["HS256"],
+      algorithms: ["HS512"],
     },
     async ({ userId }, done) => {
       try {
