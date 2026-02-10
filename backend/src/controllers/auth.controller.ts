@@ -23,6 +23,8 @@ export const registerController = asyncHandler(
 );
 
 export const loginController = asyncHandler(
+
+    //yo chai passed as a controller
     async (req: Request, res: Response) => {
         const body = loginSchema.parse(req.body);
 
@@ -37,6 +39,7 @@ export const loginController = asyncHandler(
                 user,
             })
     }
+    
 )
 export const logoutController = asyncHandler(
     async (req: Request, res: Response) => {
