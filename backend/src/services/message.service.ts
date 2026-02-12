@@ -3,6 +3,7 @@ import ChatModel from "../models/chat.model";
 import MessageModel from "../models/message,model";
 
 import { BadRequestException } from "../utils/app-Error";
+import cloudinary from "../config/cloudinary.config";
 
 export const sendMessageService = async (
   userId: string,
@@ -33,41 +34,41 @@ export const sendMessageService = async (
 
   let imageUrl;
 
-  if (image) { }
+  if (image) {
+    const uploadedImage = await cloudinary.uploader.upload(image);
+    imageUrl = uploadedImage.secure_url;
+  }
 
-    const newMessage = await MessageModel.create({
-        chatId,
-        sender: userId,
-        content,
-        image: imageUrl,
-        replyTo: replyToId,
-    });
+  const newMessage = await MessageModel.create({
+    chatId,
+    sender: userId,
+    content,
+    image: imageUrl,
+    replyTo: replyToId,
+  });
 
-    await newMessage.populate([
-        {
-            path: "sender",
-            select: "name avatar"
-        },
-        {
-            path: "replyTo",
-            select: "content image sender",
-            populate: {
-                path: "sender",
-                select: "name avatar",
-            },
-        },
-    ]);
-    
-    chat.lastMessage = newMessage._id as mongoose.Types.ObjectId;
-    await chat.save();
+  await newMessage.populate([
+    {
+      path: "sender",
+      select: "name avatar",
+    },
+    {
+      path: "replyTo",
+      select: "content image sender",
+      populate: {
+        path: "sender",
+        select: "name avatar",
+      },
+    },
+  ]);
+
+  chat.lastMessage = newMessage._id as mongoose.Types.ObjectId;
+  await chat.save();
 
   //web socket
-  
-
 
   return {
     userMessage: newMessage,
     chat,
-  }
-
+  };
 };
