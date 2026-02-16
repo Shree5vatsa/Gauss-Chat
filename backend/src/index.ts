@@ -10,6 +10,7 @@ import passport, { initialize } from "passport";
 import { HTTP_STATUS } from "./config/http.config";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import router from "./routes";
+import { initializeSocket } from "./lib/socket";
 
 const app = express();
 const server = http.createServer(app);

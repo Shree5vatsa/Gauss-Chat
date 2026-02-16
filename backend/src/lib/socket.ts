@@ -26,14 +26,14 @@ export const initializeSocket = (httpServer: HTTPServer) => {
             const rawCookie = socket.handshake.headers.cookie;
             
             if (!rawCookie) return next(new Error("Unauthorized"));
-
+//
             const token = rawCookie?.split("=")?.[1]?.trim();
             if (!token) return next(new Error("Unauthorized"));
 
             const decodedToken = jwt.verify(token, Env.JWT_SECRET) as {
                 userId: string;
             };
-
+//
             if(!decodedToken)return next(new Error("Unauthorized"));
 
             socket.userId = decodedToken.userId;
@@ -95,3 +95,50 @@ export const initializeSocket = (httpServer: HTTPServer) => {
 
     });
 }; 
+
+function getIO() {
+    if(!io) throw new Error("Socket not initialized");
+    return io;
+}
+
+export const emitNewChatToParticipants = (
+    participantIds: string[] = [],
+    chat:any,
+) => {
+    const io = getIO();
+    for (const participantId of participantIds) {
+      io.to(`user:${participantId}`).emit("chat:new", chat);
+    }
+}
+
+export const emitNewMessageTochatRoom = (
+    senderId: string,
+    chatId: string,
+    message: any
+)=> {
+    const io = getIO();
+    const senderSocketId = onlineUsers.get(senderId?.toString());
+
+   console.log(senderId, "senderId");
+   console.log(senderSocketId, "sender socketid exist");
+   console.log("All online users:", Object.fromEntries(onlineUsers));
+
+    if (senderSocketId) {
+       io.to(`chat:${chatId}`).except(senderSocketId).emit("message:new", message);
+    } else {
+        io.to(`chat:${chatId}`).emit("message:new", message);
+    }
+}
+
+export const emitLastMessageToParticipants = (
+  participantIds: string[],
+  chatId: string,
+  lastMessage:any,
+) => {
+  const io = getIO();
+  const payload = { chatId, lastMessage };
+
+  for (const participantId of participantIds) {
+    io.to(`user:${participantId}`).emit("chat:update",payload);
+  }
+}
