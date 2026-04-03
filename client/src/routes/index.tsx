@@ -36,3 +36,20 @@ const AppRoutes = () => {
     )
 }
 export default AppRoutes;
+
+
+/*import { Navigate, Outlet } from "react-router-dom";
+
+const RouteGuard = ({ requiredAuth }: Props) => {
+    const isLoggedIn = false; // replace with real auth logic
+
+    if (requiredAuth && !isLoggedIn) {
+        return <Navigate to="/" />;
+    }
+
+    if (!requiredAuth && isLoggedIn) {
+        return <Navigate to="/chat" />;
+    }
+
+    return <Outlet />;
+}; */
