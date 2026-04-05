@@ -13,7 +13,7 @@ const AppRoutes = () => {
 
             {/* Auth/Public routes */}
 
-            <Route path="/" element={<RouteGuard requiredAuth={false}/>}>
+            <Route path="/" element={<RouteGuard requireAuth={false}/>}>
                 <Route element={<BaseLayout />}>
                     {authRoutesPaths?.map((route)=>(
                         <Route key={route.path} path={route.path} element={route.element}/>
@@ -23,7 +23,7 @@ const AppRoutes = () => {
 
             {/* Protected routes */}
 
-            <Route path="/" element={<RouteGuard requiredAuth={true}/>}>
+            <Route path="/" element={<RouteGuard requireAuth={true}/>}>
                 <Route element={<AppLayout />}>
                     {protectedRoutesPaths?.map((route)=>(
                         <Route key={route.path} path={route.path} element={route.element}/>
