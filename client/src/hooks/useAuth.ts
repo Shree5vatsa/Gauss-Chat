@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { toast } from "sonner";
 import { useSocket } from "./useSocket";
 import { API } from "@/lib/axios-client";
+import {navigate} from "@/lib/navigation";
 
 
 interface AuthState {
@@ -34,6 +35,9 @@ export const useAuth = create<AuthState>()((set) => ({
       // So Zustand gives getState() as a workaround
       useSocket.getState().connectSocket();
       toast.success("Register successfully");
+      //proceed to chat page
+      navigate("/chat");
+
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Register failed");
     } finally {
@@ -47,6 +51,8 @@ export const useAuth = create<AuthState>()((set) => ({
       set({ user: response.data.user });
       useSocket.getState().connectSocket();
       toast.success("Login successfully");
+
+      navigate("/chat");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
