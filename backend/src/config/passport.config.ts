@@ -15,7 +15,7 @@ passport.use(
       ]),
       secretOrKey: Env.JWT_SECRET,
       audience: ["user"],
-      // Remove algorithms or match it with your signing algorithm
+      // Remove algorithms or match it with signing algorithm
       // algorithms: ["HS256"], // Default is HS256
     },
     async (payload, done) => {
