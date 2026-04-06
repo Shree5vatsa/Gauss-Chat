@@ -13,12 +13,14 @@ export const setJwtAuthCookie = async ({ res, userId }: CookieParams) => {
   const token = jwt.sign({ userId }, Env.JWT_SECRET, {
     audience: ["user"],
     expiresIn: Env.JWT_EXPIRES_IN as Time,
+    // Don't specify algorithm, let it use default (HS256)
+    // OR specify: algorithm: "HS256"
   });
 
   return res.cookie("accessToken", token, {
     httpOnly: true,
     secure: Env.NODE_ENV === "production",
-    sameSite: Env.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: "lax", // Use "lax" for both dev and prod
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   });

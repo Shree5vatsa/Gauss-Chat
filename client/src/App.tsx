@@ -12,9 +12,15 @@ function App() {
   const isAuth = isAuthRoute(pathname);
 
   useEffect(() => {
+    console.log("App useEffect - isAuth:", isAuth, "current user:", user);
     if (isAuth) return;
+    console.log("Calling isAuthStatus...");
     isAuthStatus();
   }, [isAuthStatus, isAuth]);
+
+  useEffect(() => {
+    console.log("User state changed in App:", user);
+  }, [user]);
 
   if (isAuthStatusLoading && !user) {
     return (
