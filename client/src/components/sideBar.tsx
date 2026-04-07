@@ -6,60 +6,37 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import AvatarWithBadge from "./avatarWithBadge";
 
 const Sidebar = () => {
+  const { user, logout } = useAuth();
+  const isOnline = isUserOnline(user?._id);
 
-    const { user, logout } = useAuth();
+  return (
+    <aside className="fixed inset-y-0 left-0 z-50 w-13 bg-primary/85 shadow-sm">
+      <div className="flex flex-col items-center justify-between h-full py-4">
+        <Logo
+          url={PROTECTED_ROUTES.CHAT}
+          imgClass="size-13" // Reduced from size-10
+          textClass="text-white"
+          showText={false}
+        />
 
-    const isOnline = isUserOnline(user?._id);
-    
-    return (
-      <aside
-        className="
-  top-0 fixed inset-y-0
-  w-11 left-0 z-[9999]
-  h-svh bg-primary/85 shadow-sm"
-      >
-        <div
-          className="
-       w-full h-full px-1 pt-1 pb-6 flex flex-col
-       items-center justify-between"
-        >
-          <Logo
-            url={PROTECTED_ROUTES.CHAT}
-            imgClass="size-7"
-            textClass="text-white"
-            showText={false}
-          />
-
-          <div
-            className="
-         flex flex-col items-center gap-3
-        "
-          >
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div role="button">
-                  {/* {Avatar} */}
-                  <AvatarWithBadge
-                    name={user?.name || "unKnown"}
-                    src={user?.avatar || ""}
-                    isOnline={isOnline}
-                    className="!bg-white"
-                  />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg z-[99999]"
-                align="end"
-              >
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </aside>
-    );
-}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <AvatarWithBadge
+              name={user?.name || "unKnown"}
+              src={user?.avatar || ""}
+              isOnline={isOnline}
+              className="!bg-white cursor-pointer"
+              size="w-8 h-8" // Match logo size
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-48 rounded-lg z-50" align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </aside>
+  );
+};
 
 export default Sidebar;
