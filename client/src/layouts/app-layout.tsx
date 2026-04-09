@@ -14,10 +14,14 @@ const AppLayout = () => {
         </div>
 
         {/* ChatList */}
-        <ChatList />
+        <div>
+          <ChatList />
+        </div>
 
-
-        <Outlet />
+        {/* Main Content */}
+        <div>
+          <Outlet />
+        </div>
       </div>
     </AppWrapper>
   );

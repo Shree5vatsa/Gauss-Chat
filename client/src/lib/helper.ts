@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
+import { v4 as uuidv4 } from "uuid";
 
 export const isUserOnline = (userId?: string) => {
   if (!userId) return false;
@@ -13,4 +14,8 @@ export const isUserOnline = (userId?: string) => {
   }
   
   return onlineUsers.includes(userId);
+};
+
+export const generateUUID = () => {
+  return uuidv4();
 };
