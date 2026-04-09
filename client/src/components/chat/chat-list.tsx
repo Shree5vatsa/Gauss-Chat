@@ -111,14 +111,14 @@ const ChatList = () => {
     <div
       className="fixed inset-y-0
       pb-20 lg:pb-0
-      lg:max-w-[379px]
+      lg:max-w-[420px]
       lg:block
       border-r
       border-border
       bg-sidebar
       max-w-[calc(100%-40px)]
       w-full
-      left-10
+      left-16
       z-[98]
     "
     >
