@@ -4,7 +4,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/input-group";
-import NewChatPopover from "./newchat-popover";
+import { NewChatPopover } from "./newchat-popover";
 import { cn } from "@/lib/utils";
 
 // ============================================
