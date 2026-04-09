@@ -1,7 +1,7 @@
 import AppWrapper from "@/components/app-wrapper";
 import { Outlet } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme-toggle";
-import ChatList from "@/components/chat/chat_list";
+import ChatList from "@/components/chat/chat-list";
 
 const AppLayout = () => {
   return (
