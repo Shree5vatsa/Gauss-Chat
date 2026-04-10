@@ -32,13 +32,13 @@ const AvatarWithBadge = ({
           <AvatarImage src={avatar} />
           <AvatarFallback
             className={cn(
-              `bg-primary/10
-         text-primary font-semibold
-        `,
+              `bg-primary/15
+    text-primary font-bold text-4xl
+    `,
               className && className,
             )}
           >
-            {name?.charAt(0)}
+            {name?.charAt(0)?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
 

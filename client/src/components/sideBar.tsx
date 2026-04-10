@@ -46,7 +46,7 @@ const Sidebar = () => {
                     src={user?.avatar || ""}
                     isOnline={isOnline}
                     className="shadow-sm border border-border/40 group-hover:border-primary/50 transition-colors !bg-background"
-                    size="w-10 h-10"
+                    size="w-13 h-13"
                   />
                 </div>
               </div>
