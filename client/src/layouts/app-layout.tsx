@@ -6,20 +6,21 @@ import ChatList from "@/components/chat/chat-list";
 const AppLayout = () => {
   return (
     <AppWrapper>
-      <div className="h-full relative">
+      <div className="h-full flex">
+        {/* Sidebar space already handled */}
 
         {/* Theme toggle button */}
         <div className="fixed top-4 right-4 z-50">
           <ThemeToggle />
         </div>
 
-        {/* ChatList */}
-        <div>
+        {/* Chat List */}
+        <div className="hidden lg:block w-[360px] border-r border-border bg-sidebar">
           <ChatList />
         </div>
 
-        {/* Main Content */}
-        <div>
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col bg-background">
           <Outlet />
         </div>
       </div>

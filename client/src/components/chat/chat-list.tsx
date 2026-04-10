@@ -115,7 +115,7 @@ const ChatList = () => {
       lg:block
       border-r
       border-border
-      bg-sidebar
+      bg-card
       max-w-[calc(100%-40px)]
       w-full
       left-16
@@ -141,7 +141,7 @@ const ChatList = () => {
             overflow-y-auto
           "
         >
-          <div className="px-2 pb-10 pt-1 space-y-1">
+          <div className="px-3 py-2 space-y-1">
             {isChatsLoading ? (
               <div className="flex items-center justify-center h-32">
                 <Spinner className="w-7 h-7" />

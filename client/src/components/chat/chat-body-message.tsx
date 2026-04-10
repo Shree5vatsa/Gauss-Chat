@@ -35,7 +35,7 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
   );
 
   const messageClass = cn(
-    "min-w-[200px] px-3 py-2 text-sm break-words shadow-sm",
+    "min-w-[180px] px-3.5 py-2.5 text-sm break-words shadow-sm border border-border/50",
     isCurrentUser
       ? "bg-primary text-primary-foreground rounded-tr-xl rounded-l-xl"
       : "bg-muted rounded-bl-xl rounded-r-xl",

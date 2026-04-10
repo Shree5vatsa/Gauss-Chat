@@ -48,10 +48,10 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-2 p-2 rounded-sm",
-        "transition-all duration-200 ease-in-out",
-        "hover:bg-sidebar-accent text-left",
-        isActive && "!bg-sidebar-accent",
+        "w-full flex items-center gap-3 p-2 rounded-lg",
+        "transition-all duration-200",
+        "hover:bg-muted/70",
+        isActive && "bg-muted",
         hasUnread && "bg-primary/5",
       )}
     >
