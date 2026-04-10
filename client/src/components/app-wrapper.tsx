@@ -6,11 +6,12 @@ interface Props {
 }
 
 const AppWrapper = ({ children }: Props) => {
-    return <div className = "h-full">
-      {/* Toolbar */}
+  return (
+    <div className="h-full flex">
       <Sidebar />
-        <main className="lg:pl-16 h-full" >{children}</main>
-  </div>;
+      <main className="flex-1 lg:ml-16 h-full overflow-auto">{children}</main>
+    </div>
+  );
 };
 
 export default AppWrapper;

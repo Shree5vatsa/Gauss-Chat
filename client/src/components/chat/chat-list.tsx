@@ -110,16 +110,15 @@ const ChatList = () => {
   return (
     <div
       className="fixed inset-y-0
-      pb-20 lg:pb-0
-      lg:max-w-[420px]
-      lg:block
-      border-r
-      border-border
-      bg-card
-      max-w-[calc(100%-40px)]
-      w-full
-      left-16
-      z-[98]
+  pb-20 lg:pb-0
+  lg:w-[480px]
+  lg:block
+  border-r
+  border-border
+  bg-card
+  w-full
+  z-[98]
+  left-16
     "
     >
       <div className="flex-col">
