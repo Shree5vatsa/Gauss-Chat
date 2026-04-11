@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 import ChatModel from "../models/chat.model";
-import MessageModel from "../models/message,model";
+import MessageModel from "../models/message.model";
 
 import { BadRequestException } from "../utils/app-Error";
 import cloudinary from "../config/cloudinary.config";
-import { emitLastMessageToParticipants, emitNewMessageTochatRoom } from "../lib/socket";
+import {
+  emitLastMessageToParticipants,
+  emitNewMessageTochatRoom,
+} from "../lib/socket";
 
 export const sendMessageService = async (
   userId: string,
@@ -68,9 +71,9 @@ export const sendMessageService = async (
 
   //web socket
   emitNewMessageTochatRoom(userId, chatId, newMessage);
-  
+
   const allParticipantIds = chat.participants.map((id) => id.toString());
-  emitLastMessageToParticipants(allParticipantIds,chatId,newMessage);
+  emitLastMessageToParticipants(allParticipantIds, chatId, newMessage);
 
   return {
     userMessage: newMessage,
