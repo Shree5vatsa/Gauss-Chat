@@ -17,8 +17,6 @@ const chatSchema = new Schema<ChatDocument>(
       type: [Schema.Types.ObjectId],
       ref: "User",
       required: true,
-
-      //mongoose.Types.ObjectId[] gives the run time data
       validate: {
         validator: function (value: mongoose.Types.ObjectId[]) {
           return value.length >= 2;
@@ -54,17 +52,11 @@ const chatSchema = new Schema<ChatDocument>(
   { timestamps: true },
 );
 
+// Index for sorting chats by last message time
 chatSchema.index({ participants: 1, updatedAt: -1 });
 
-chatSchema.index(
-  { participants: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      isGroup: false,
-    },
-  },
-);
+
+// Users can now have multiple 1-on-1 chats with different people
 
 const ChatModel = mongoose.model<ChatDocument>("Chat", chatSchema);
 

@@ -77,7 +77,7 @@ export const useChat = create<ChatState>()((set, get) => ({
       toast.success("Chat created successfully");
       return response.data.chat;
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to fetch chats");
+      toast.error(error?.response?.data?.message || "Failed to create chat");
       return null;
     } finally {
       set({ isCreatingChat: false });
