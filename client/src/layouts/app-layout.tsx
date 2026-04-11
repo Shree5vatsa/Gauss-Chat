@@ -75,18 +75,18 @@ const AppLayout = () => {
         {isChatListVisible && (
           <div
             className={cn(
-              "border-r border-border bg-sidebar h-full transition-all duration-300",
-              // Medium/Large screens (>= 768px) - normal layout
+              "border-r border-border bg-sidebar h-full",
+              // Medium/Large screens (>= 768px) - normal layout with resize
               !isSmallScreen && "relative",
-              !isSmallScreen && { width: `${width}px` },
-              // Small screens (< 768px) - overlay next to sidebar
+              // Small screens (< 768px) - overlay
               isSmallScreen &&
-                "fixed top-0 left-16 bottom-0 z-[99] w-[calc(100%-64px)]",
+                "fixed top-0 bottom-0 z-[99] w-[calc(100%-64px)]",
             )}
+            style={!isSmallScreen ? { width: `${width}px` } : {}}
           >
             <ChatList onChatSelect={handleChatSelect} />
 
-            {/* Resize Handle - Only on medium/large screens */}
+            {/* Resize Handle - Only on medium/large screens (NOT small) */}
             {!isSmallScreen && (
               <div
                 className={cn(

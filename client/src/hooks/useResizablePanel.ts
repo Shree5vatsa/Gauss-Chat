@@ -38,17 +38,18 @@ export const useResizablePanel = ({
     },
     [storageKey],
   );
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isResizing) return;
-      const delta = e.clientX - startXRef.current;
-      let newWidth = startWidthRef.current + delta;
-      newWidth = Math.min(maxWidth, Math.max(minWidth, newWidth));
-      setWidth(newWidth);
-    },
-    [isResizing, minWidth, maxWidth],
-  );
+const handleMouseMove = useCallback(
+  (e: MouseEvent) => {
+    if (!isResizing) return;
+    console.log("Mouse moving, isResizing:", isResizing); // ← Add this
+    const delta = e.clientX - startXRef.current;
+    let newWidth = startWidthRef.current + delta;
+    newWidth = Math.min(maxWidth, Math.max(minWidth, newWidth));
+    console.log("New width:", newWidth); // ← Add this
+    setWidth(newWidth);
+  },
+  [isResizing, minWidth, maxWidth],
+);
 
   const handleMouseUp = useCallback(() => {
     if (!isResizing) return;
