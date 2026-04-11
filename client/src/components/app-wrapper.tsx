@@ -3,13 +3,14 @@ import Sidebar from "./sideBar";
 
 interface Props {
   children: React.ReactNode;
+  onToggleChatList?: () => void;
 }
 
-const AppWrapper = ({ children }: Props) => {
+const AppWrapper = ({ children, onToggleChatList }: Props) => {
   return (
     <div className="h-full flex">
-      <Sidebar />
-      <main className="flex-1 lg:ml-16 h-full overflow-auto">{children}</main>
+      <Sidebar onToggleChatList={onToggleChatList} />
+      <main className="flex-1 ml-16 h-full overflow-auto">{children}</main>
     </div>
   );
 };

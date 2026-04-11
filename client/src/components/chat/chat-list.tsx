@@ -9,7 +9,11 @@ import { useSocket } from "@/hooks/useSocket";
 import type { ChatType } from "@/types/chat.types";
 import type { MessageType } from "@/types/chat.types";
 
-const ChatList = () => {
+interface ChatListProps {
+  onChatSelect?: (chatId: string) => void;
+}
+
+const ChatList = ({ onChatSelect }: ChatListProps) => {
   const navigate = useNavigate();
   const { socket } = useSocket();
   const {
@@ -89,8 +93,12 @@ const ChatList = () => {
     };
   }, [socket, updateChatLastMessage]);
 
-  const onRoute = (id: string) => {
-    navigate(`/chat/${id}`);
+  const handleChatClick = (chatId: string) => {
+    if (onChatSelect) {
+      onChatSelect(chatId);
+    } else {
+      navigate(`/chat/${chatId}`);
+    }
   };
 
   return (
@@ -152,7 +160,7 @@ const ChatList = () => {
                 key={chat._id}
                 chat={chat}
                 currentUserId={currentUserId}
-                onClick={() => onRoute(chat._id)}
+                onClick={() => handleChatClick(chat._id)}
               />
             ))
           )}

@@ -10,16 +10,22 @@ import {
   DropdownMenuTrigger,
 } from "./ui/drop-down-menu";
 import AvatarWithBadge from "./avatarWithBadge";
+import HamburgerButton from "./ui/hamburger-button";
 
-const Sidebar = () => {
+interface SidebarProps {
+  onToggleChatList?: () => void;
+}
+
+const Sidebar = ({ onToggleChatList }: SidebarProps) => {
   const { user, logout } = useAuth();
   const isOnline = isUserOnline(user?._id);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 w-16 bg-primary border-r border-border shadow-sm transition-all duration-300">
       <div className="flex flex-col items-center justify-between h-full py-5">
-        {/* Top Section - Logo */}
+        {/* Top Section - Logo & Hamburger */}
         <div className="flex flex-col items-center gap-6 w-full">
+          {/* Logo */}
           <div className="relative group cursor-pointer mt-2">
             <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-500"></div>
             <Logo
@@ -29,6 +35,9 @@ const Sidebar = () => {
               showText={false}
             />
           </div>
+
+          {/* Hamburger Button - Below Logo */}
+          <HamburgerButton onClick={onToggleChatList || (() => {})} />
         </div>
 
         {/* Bottom Section - Avatar */}
