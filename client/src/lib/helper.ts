@@ -6,11 +6,11 @@ import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 
 export const isUserOnline = (userId?: string) => {
   if (!userId) return false;
-  const socketState = useSocket.getState();
-  const onlineUsers = socketState.onlineUsers || [];
 
   const { user } = useAuth.getState();
+  const { onlineUsers } = useSocket.getState();
 
+  // Current user is always online for themselves
   if (user?._id === userId) {
     return true;
   }
@@ -34,6 +34,7 @@ export const getOtherUserAndGroup = (
       subheading: `${chat.participants.length} members`,
       avatar: "",
       isGroup,
+      isOnline: false, // ← ADD THIS
     };
   }
 
@@ -46,9 +47,9 @@ export const getOtherUserAndGroup = (
     avatar: other?.avatar || "",
     isGroup: false,
     isOnline,
-    // isAI: other?.isAI || false,
   };
 };
+
 export const formatChatTime = (date: string | Date) => {
   if (!date) return "";
   const newDate = new Date(date);
