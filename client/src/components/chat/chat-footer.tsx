@@ -5,11 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
-import { Paperclip, Send, X } from "lucide-react"; // ❌ REMOVED ImageIcon
+import { Paperclip, Send, X } from "lucide-react";
 import { Form, FormField, FormItem } from "../ui/form";
 import { Input } from "../ui/input";
 import ChatReplyBar from "./chat-reply-bar";
 import { useChat } from "@/hooks/useChat";
+import { useSocket } from "@/hooks/useSocket";
 
 interface Props {
   chatId: string | null;
@@ -29,10 +30,10 @@ const ChatFooter = ({
   });
 
   const { sendMessage, isSendingMsg } = useChat();
+  const { socket } = useSocket();
 
   const [image, setImage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
-  // FIX: Replace NodeJS.Timeout with ReturnType<typeof setTimeout>
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -62,11 +63,20 @@ const ChatFooter = ({
   };
 
   const handleTyping = () => {
-    setIsTyping(true);
+    if (!socket || !chatId) return;
+
+    if (!isTyping) {
+      setIsTyping(true);
+      // Emit typing start to other user
+      socket.emit("typing:start", chatId);
+    }
+
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       setIsTyping(false);
-    }, 1000);
+      // Emit typing stop to other user
+      socket.emit("typing:stop", chatId);
+    }, 1500);
   };
 
   const onSubmit = (values: { message?: string }) => {
@@ -75,6 +85,13 @@ const ChatFooter = ({
       toast.error("Please enter a message or select an image");
       return;
     }
+
+    // Stop typing indicator before sending
+    if (socket && chatId) {
+      socket.emit("typing:stop", chatId);
+    }
+    setIsTyping(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     const payload = {
       chatId,
@@ -87,7 +104,6 @@ const ChatFooter = ({
     onCancelReply();
     handleRemoveImage();
     form.reset();
-    setIsTyping(false);
   };
 
   return (
@@ -130,7 +146,6 @@ const ChatFooter = ({
           </div>
         )}
 
-        {/* Typing Indicator */}
         {isTyping && (
           <div className="max-w-6xl mx-auto px-4 pb-1">
             <span className="text-xs text-muted-foreground animate-pulse">

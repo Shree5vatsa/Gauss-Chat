@@ -1,6 +1,11 @@
 import { API } from "@/lib/axios-client";
 import type { UserType } from "@/types/auth.type";
-import type { ChatType, CreateChatType, CreateMessageType, MessageType } from "@/types/chat.types";
+import type {
+  ChatType,
+  CreateChatType,
+  CreateMessageType,
+  MessageType,
+} from "@/types/chat.types";
 import { toast } from "sonner";
 import { create } from "zustand";
 import { generateUUID } from "@/lib/helper";
@@ -117,12 +122,13 @@ export const useChat = create<ChatState>()((set, get) => ({
       status: "sending...",
     };
 
+    // Add temp message
     set((state) => {
-      if (state.singleChat?.chat?._id != chatId) return state;
+      if (state.singleChat?.chat?._id !== chatId) return state;
       return {
         singleChat: {
           ...state.singleChat,
-          messages: [...state.singleChat?.messages, tempMessage],
+          messages: [...state.singleChat.messages, tempMessage],
         },
       };
     });
@@ -135,8 +141,32 @@ export const useChat = create<ChatState>()((set, get) => ({
         replyToId: replyTo?._id,
       });
       const { userMessage } = data;
+
+      // ✅ Replace temp message with real message
       set((state) => {
         if (!state.singleChat) return state;
+
+        // Check if message already exists (from socket)
+        const messageExists = state.singleChat.messages.some(
+          (msg) => msg._id === userMessage._id,
+        );
+
+        if (messageExists) {
+          console.log(
+            "⚠️ Message already exists from socket, just removing temp",
+          );
+          // Just remove temp message, don't add duplicate
+          return {
+            singleChat: {
+              ...state.singleChat,
+              messages: state.singleChat.messages.filter(
+                (msg) => msg._id !== tempUserId,
+              ),
+            },
+          };
+        }
+
+        // Replace temp with real message
         return {
           singleChat: {
             ...state.singleChat,
@@ -148,6 +178,18 @@ export const useChat = create<ChatState>()((set, get) => ({
       });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to send message");
+      // Remove temp message on error
+      set((state) => {
+        if (!state.singleChat) return state;
+        return {
+          singleChat: {
+            ...state.singleChat,
+            messages: state.singleChat.messages.filter(
+              (msg) => msg._id !== tempUserId,
+            ),
+          },
+        };
+      });
     } finally {
       set({ isSendingMsg: false });
     }
@@ -159,7 +201,6 @@ export const useChat = create<ChatState>()((set, get) => ({
         (chat) => chat._id === newChat._id,
       );
       if (existingChatIndex !== -1) {
-        //if chat exists
         return {
           chats: [
             newChat,
@@ -167,7 +208,6 @@ export const useChat = create<ChatState>()((set, get) => ({
           ],
         };
       } else {
-        // if doesnt
         return { chats: [newChat, ...state.chats] };
       }
     });
@@ -187,11 +227,22 @@ export const useChat = create<ChatState>()((set, get) => ({
     });
   },
 
+  // ✅ FIXED: Added duplicate message check
   addNewMessage: (chatId: string, message: MessageType) => {
     const chat = get().singleChat;
-    if(chat?.chat._id === chatId){
+    if (chat?.chat._id === chatId) {
+      // Check if message already exists to prevent duplicates
+      const messageExists = chat.messages.some((m) => m._id === message._id);
+      if (messageExists) {
+        console.log(
+          "⚠️ Message already exists, skipping duplicate:",
+          message._id,
+        );
+        return;
+      }
+
       set({
-        singleChat:{
+        singleChat: {
           chat: chat.chat,
           messages: [...chat.messages, message],
         },

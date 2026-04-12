@@ -1,12 +1,11 @@
 import EmptyState from "@/components/empty-state";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { useChat } from "@/hooks/useChat";
 import useChatId from "@/hooks/useChatId";
 import ChatHeader from "@/components/chat/chat-header";
 import ChatBody from "@/components/chat/chat-body";
 import ChatFooter from "@/components/chat/chat-footer";
-import { useState } from "react";
 import type { MessageType } from "@/types/chat.types";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,6 +14,7 @@ const SingleChat = () => {
   const { socket } = useSocket();
   const { fetchSingleChat, singleChat, isSingleChatLoading } = useChat();
   const [replyTo, setReplyTo] = useState<MessageType | null>(null);
+  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const { user } = useAuth();
 
   // Fetch chat when chatId changes
@@ -42,6 +42,31 @@ const SingleChat = () => {
     return () => {
       socket.emit("chat:leave", chatId);
       console.log("Left chat room:", chatId);
+    };
+  }, [socket, chatId]);
+
+  // Listen for typing events
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTypingStart = (typingChatId: string) => {
+      if (typingChatId === chatId) {
+        setIsOtherUserTyping(true);
+      }
+    };
+
+    const handleTypingStop = (typingChatId: string) => {
+      if (typingChatId === chatId) {
+        setIsOtherUserTyping(false);
+      }
+    };
+
+    socket.on("typing:start", handleTypingStart);
+    socket.on("typing:stop", handleTypingStop);
+
+    return () => {
+      socket.off("typing:start", handleTypingStart);
+      socket.off("typing:stop", handleTypingStop);
     };
   }, [socket, chatId]);
 
@@ -74,6 +99,14 @@ const SingleChat = () => {
   return (
     <div className="h-full w-full flex flex-col">
       <ChatHeader chat={singleChat.chat} currentUserId={user?._id || null} />
+
+      {/* Typing Indicator Banner */}
+      {isOtherUserTyping && (
+        <div className="px-4 py-1 text-xs text-muted-foreground animate-pulse bg-background/50 backdrop-blur-sm border-b border-border">
+          Typing...
+        </div>
+      )}
+
       <ChatBody
         chatId={chatId}
         messages={singleChat.messages || []}

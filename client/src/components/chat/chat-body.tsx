@@ -4,6 +4,7 @@ import type { MessageType } from "@/types/chat.types";
 import { useEffect, useRef } from "react";
 import ChatBodyMessage from "./chat-body-message";
 
+
 interface Props {
   chatId: string | null;
   messages: MessageType[];
@@ -30,8 +31,16 @@ const ChatBody = ({ chatId, messages, onReply }: Props) => {
     if (!socket) return;
 
     const handleNewMessage = (msg: MessageType) => {
+      console.log(
+        "🟢 ChatBody received message:",
+        msg._id,
+        "Content:",
+        msg.content,
+      );
+
       // Only add message if it belongs to current chat
       if (msg.chatId === chatId) {
+        console.log("✅ Adding message to current chat");
         addNewMessage(chatId, msg);
       }
     };
