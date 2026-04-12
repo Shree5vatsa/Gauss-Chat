@@ -103,7 +103,7 @@ const AppLayout = () => {
         {/* Main Chat Area - Hidden on small screens when chat list is visible */}
         <div
           className={cn(
-            "flex-1 flex flex-col bg-background min-w-0 h-full transition-all duration-300",
+            "flex-1 flex flex-col bg-background min-w-0 h-full",
             isSmallScreen && isChatListVisible && "hidden",
           )}
         >
