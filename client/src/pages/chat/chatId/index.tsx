@@ -8,6 +8,7 @@ import ChatBody from "@/components/chat/chat-body";
 import ChatFooter from "@/components/chat/chat-footer";
 import type { MessageType } from "@/types/chat.types";
 import { useAuth } from "@/hooks/useAuth";
+import { API } from "@/lib/axios-client";
 
 const SingleChat = () => {
   const chatId = useChatId();
@@ -25,6 +26,15 @@ const SingleChat = () => {
       fetchSingleChat(chatId);
     }
   }, [chatId, fetchSingleChat]);
+
+  // ✅ Reset unread count when chat is opened
+  useEffect(() => {
+    if (chatId && user?._id) {
+      API.post(`/chat/${chatId}/reset-unread`)
+        .then(() => console.log("Unread count reset"))
+        .catch((err) => console.error("Failed to reset unread:", err));
+    }
+  }, [chatId, user]);
 
   // Join/leave chat room for real-time messages
   useEffect(() => {

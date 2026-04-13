@@ -6,6 +6,7 @@ import {
   createChatService,
   getUserChatService,
   getSingleChatService,
+  resetUnreadCountService,
 } from "../services/chat.service";
 import { HTTP_STATUS } from "../config/http.config";
 
@@ -54,6 +55,22 @@ export const getSingleChatController = asyncHandler(
       message: "Chat fetched successfully",
       chat,
       messages,
+    });
+  },
+);
+
+// ✅ NEW: Reset unread count when user opens a chat
+export const resetUnreadCountController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id?.toString();
+    if (!userId) throw new UnauthorizedException("User not authenticated");
+
+    const { id } = chatIdSchema.parse(req.params);
+
+    await resetUnreadCountService(id, userId);
+
+    return res.status(HTTP_STATUS.OK).json({
+      message: "Unread count reset successfully",
     });
   },
 );

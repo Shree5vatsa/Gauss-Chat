@@ -13,7 +13,6 @@ export const createChatService = async (
     participants?: string[];
     groupName?: string;
     groupAvatar?: string;
-    //careful
   },
 ) => {
   const { participantId, isGroup, participants, groupName, groupAvatar } = body;
@@ -21,7 +20,6 @@ export const createChatService = async (
   let chat;
   let allParticipantIds: string[] = [];
 
-  //yedi group chat ho bhane
   if (isGroup && participants?.length && groupName) {
     allParticipantIds = [userId, ...participants];
 
@@ -30,12 +28,10 @@ export const createChatService = async (
       isGroup: true,
       groupName,
       createdBy: userId,
-      admin: userId, // ← ADD THIS LINE (creator is admin)
+      admin: userId,
       groupAvatar,
     });
-  }
-  //yedi individual chat ho bhane
-  else if (participantId) {
+  } else if (participantId) {
     const otherUser = await userModel.findById(participantId);
     if (!otherUser) {
       throw new NotFoundException("User not found");
@@ -58,7 +54,6 @@ export const createChatService = async (
     });
   }
 
-  //when new chat is created,emit event to all participants
   const populatedChat = await chat?.populate(
     "participants",
     "name avatar isAI",
@@ -85,20 +80,17 @@ export const getUserChatService = async (userId: string) => {
     })
     .sort({ updatedAt: -1 });
 
-  return chats;
-  //yesto array bancha
-  // [
-  //   {
-  //     _id: "...",
-  //     participants: [{ name, avatar }, ...],
-  //     lastMessage: {
-  //       text: "...",
-  //       sender: { name, avatar }
-  //     },
-  //     updatedAt: "2026-01-10T..."
-  //   },
-  //   ...
-  // ]
+  // ✅ ADD UNREAD COUNT FOR CURRENT USER
+  const chatsWithUnread = chats.map((chat) => {
+    const chatObj = chat.toObject();
+    const unreadCount = chat.unreadCount?.get(userId) || 0;
+    return {
+      ...chatObj,
+      unreadCount,
+    };
+  });
+
+  return chatsWithUnread;
 };
 
 export const getSingleChatService = async (chatId: string, userId: string) => {
@@ -116,7 +108,7 @@ export const getSingleChatService = async (chatId: string, userId: string) => {
     .populate("sender", "name avatar")
     .populate({
       path: "replyTo",
-      select: "Content Image Sender",
+      select: "content image sender",
       populate: {
         path: "sender",
         select: "name avatar",
@@ -141,5 +133,22 @@ export const validateChatParticipant = async (
     },
   });
   if (!chat) throw new BadRequestException("User not a participant in chat");
+  return chat;
+};
+ 
+export const resetUnreadCountService = async (
+  chatId: string,
+  userId: string,
+) => {
+  const chat = await ChatModel.findOne({
+    _id: chatId,
+    participants: { $in: [userId] },
+  });
+
+  if (!chat) throw new BadRequestException("Chat not found");
+
+  chat.unreadCount?.set(userId, 0);
+  await chat.save();
+
   return chat;
 };

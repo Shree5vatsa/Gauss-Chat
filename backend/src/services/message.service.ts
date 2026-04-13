@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import ChatModel from "../models/chat.model";
 import MessageModel from "../models/message.model";
-
 import { BadRequestException } from "../utils/app-Error";
 import cloudinary from "../config/cloudinary.config";
 import {
@@ -67,6 +66,16 @@ export const sendMessageService = async (
   ]);
 
   chat.lastMessage = newMessage._id as mongoose.Types.ObjectId;
+
+  // ✅ INCREMENT UNREAD COUNT FOR ALL PARTICIPANTS EXCEPT SENDER
+  const participants = chat.participants.map((p) => p.toString());
+  for (const participantId of participants) {
+    if (participantId !== userId) {
+      const currentCount = chat.unreadCount?.get(participantId) || 0;
+      chat.unreadCount?.set(participantId, currentCount + 1);
+    }
+  }
+
   await chat.save();
 
   //web socket

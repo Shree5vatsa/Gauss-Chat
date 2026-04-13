@@ -6,13 +6,13 @@ export interface ChatDocument extends Document {
   groupName?: string;
   admin?: mongoose.Types.ObjectId;
   lastMessage?: mongoose.Types.ObjectId | null;
+  unreadCount: Map<string, number>; // ✅ ADD THIS - userId -> count
   createdAt: Date;
   updatedAt: Date;
 }
 
 const chatSchema = new Schema<ChatDocument>(
   {
-    //participants
     participants: {
       type: [Schema.Types.ObjectId],
       ref: "User",
@@ -24,7 +24,6 @@ const chatSchema = new Schema<ChatDocument>(
         message: "Chat must have at least two participants",
       },
     },
-
     isGroup: {
       type: Boolean,
       default: false,
@@ -48,15 +47,17 @@ const chatSchema = new Schema<ChatDocument>(
       ref: "Message",
       default: null,
     },
+    // ✅ ADD THIS
+    unreadCount: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
   },
   { timestamps: true },
 );
 
-// Index for sorting chats by last message time
 chatSchema.index({ participants: 1, updatedAt: -1 });
-
-
-// Users can now have multiple 1-on-1 chats with different people
 
 const ChatModel = mongoose.model<ChatDocument>("Chat", chatSchema);
 

@@ -1,17 +1,19 @@
 import { Router } from "express";
-
-
-import { createChatController, getSingleChatController, getUserChatController } from "../controllers/chats.controller";
+import {
+  createChatController,
+  getUserChatController,
+  getSingleChatController,
+  resetUnreadCountController, 
+} from "../controllers/chats.controller";
 import { sendMessageController } from "../controllers/message.controller";
 import { passportAuthenticateJwt } from "../config/passport.config";
 
-const chatRoutes = Router().use(passportAuthenticateJwt)
-
-    .post("/create", createChatController)
-    .post("/message/send", sendMessageController)
-    .post("message/get", getSingleChatController)
-    .get("/all", getUserChatController)
-    .get("/:id", getSingleChatController);
-
+const chatRoutes = Router()
+  .use(passportAuthenticateJwt)
+  .post("/create", createChatController)
+  .post("/message/send", sendMessageController)
+  .get("/all", getUserChatController)
+  .get("/:id", getSingleChatController)
+  .post("/:id/reset-unread", resetUnreadCountController); 
 
 export default chatRoutes;
