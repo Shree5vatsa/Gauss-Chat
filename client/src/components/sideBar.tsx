@@ -11,6 +11,7 @@ import {
 } from "./ui/drop-down-menu";
 import AvatarWithBadge from "./avatarWithBadge";
 import HamburgerButton from "./ui/hamburger-button";
+import { ThemeToggle } from "./theme-toggle";
 
 interface SidebarProps {
   onToggleChatList?: () => void;
@@ -23,7 +24,7 @@ const Sidebar = ({ onToggleChatList }: SidebarProps) => {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 w-16 bg-primary border-r border-border shadow-sm transition-all duration-300">
       <div className="flex flex-col items-center justify-between h-full py-5">
-        {/* Top Section - Logo & Hamburger */}
+        {/* Top Section - Logo & Hamburger & Theme Toggle */}
         <div className="flex flex-col items-center gap-6 w-full">
           {/* Logo */}
           <div className="relative group cursor-pointer mt-2">
@@ -38,6 +39,9 @@ const Sidebar = ({ onToggleChatList }: SidebarProps) => {
 
           {/* Hamburger Button - Below Logo */}
           <HamburgerButton onClick={onToggleChatList || (() => {})} />
+
+          {/* Theme Toggle - Below Hamburger */}
+          <ThemeToggle />
         </div>
 
         {/* Bottom Section - Avatar */}

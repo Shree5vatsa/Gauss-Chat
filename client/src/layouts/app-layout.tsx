@@ -1,6 +1,5 @@
 import AppWrapper from "@/components/app-wrapper";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ThemeToggle } from "@/components/theme-toggle";
 import ChatList from "@/components/chat/chat-list";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { cn } from "@/lib/utils";
@@ -66,11 +65,6 @@ const AppLayout = () => {
   return (
     <AppWrapper onToggleChatList={toggleChatList}>
       <div className="h-screen flex flex-row overflow-hidden relative">
-        {/* Theme toggle button */}
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
-
         {/* Chat List */}
         {isChatListVisible && (
           <div
