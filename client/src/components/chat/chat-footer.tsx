@@ -17,6 +17,9 @@ interface Props {
   currentUserId: string | null;
   replyTo: MessageType | null;
   onCancelReply: () => void;
+  isOtherUserTyping?: boolean;
+  typingUserName?: string;
+  isGroupChat?: boolean;
 }
 
 const ChatFooter = ({
@@ -24,6 +27,9 @@ const ChatFooter = ({
   currentUserId,
   replyTo,
   onCancelReply,
+  isOtherUserTyping = false,
+  typingUserName = "",
+  isGroupChat = false,
 }: Props) => {
   const messageSchema = z.object({
     message: z.string().optional(),
@@ -33,7 +39,6 @@ const ChatFooter = ({
   const { socket } = useSocket();
 
   const [image, setImage] = useState<string | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -65,17 +70,15 @@ const ChatFooter = ({
   const handleTyping = () => {
     if (!socket || !chatId) return;
 
-    if (!isTyping) {
-      setIsTyping(true);
-      // Emit typing start to other user
-      socket.emit("typing:start", chatId);
-    }
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    // Get user name from auth
+    const userName = currentUserId;
+
+    socket.emit("typing:start", { chatId, userName });
+
     typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-      // Emit typing stop to other user
-      socket.emit("typing:stop", chatId);
+      socket.emit("typing:stop", { chatId });
     }, 1500);
   };
 
@@ -88,9 +91,8 @@ const ChatFooter = ({
 
     // Stop typing indicator before sending
     if (socket && chatId) {
-      socket.emit("typing:stop", chatId);
+      socket.emit("typing:stop", { chatId });
     }
-    setIsTyping(false);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
     const payload = {
@@ -105,6 +107,18 @@ const ChatFooter = ({
     handleRemoveImage();
     form.reset();
   };
+
+  // Get display text for typing indicator
+  const getTypingText = () => {
+    if (!isOtherUserTyping) return null;
+
+    if (isGroupChat && typingUserName) {
+      return `${typingUserName} is typing...`;
+    }
+    return "Typing...";
+  };
+
+  const typingText = getTypingText();
 
   return (
     <>
@@ -146,10 +160,11 @@ const ChatFooter = ({
           </div>
         )}
 
-        {isTyping && (
+        {/* Other User Typing Indicator - shows above input */}
+        {typingText && (
           <div className="max-w-6xl mx-auto px-4 pb-1">
             <span className="text-xs text-muted-foreground animate-pulse">
-              Typing...
+              {typingText}
             </span>
           </div>
         )}

@@ -92,14 +92,22 @@ export const initializeSocket = (httpServer: HTTPServer) => {
                 console.log("Socket disconnected",{userId,newSocketId});
            } 
         });
-      socket.on("typing:start", (chatId: string) => {
-        console.log(`User ${userId} started typing in chat ${chatId}`);
-        socket.to(`chat:${chatId}`).emit("typing:start", chatId);
-      });
+      socket.on(
+        "typing:start",
+        (data: { chatId: string; userName: string }) => {
+          console.log(`User ${userId} started typing in chat ${data.chatId}`);
+          socket.to(`chat:${data.chatId}`).emit("typing:start", {
+            chatId: data.chatId,
+            userName: data.userName,
+          });
+        },
+      );
 
-      socket.on("typing:stop", (chatId: string) => {
-        console.log(`User ${userId} stopped typing in chat ${chatId}`);
-        socket.to(`chat:${chatId}`).emit("typing:stop", chatId);
+      socket.on("typing:stop", (data: { chatId: string }) => {
+        console.log(`User ${userId} stopped typing in chat ${data.chatId}`);
+        socket.to(`chat:${data.chatId}`).emit("typing:stop", {
+          chatId: data.chatId,
+        });
       });
 
     });

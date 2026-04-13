@@ -15,6 +15,7 @@ const SingleChat = () => {
   const { fetchSingleChat, singleChat, isSingleChatLoading } = useChat();
   const [replyTo, setReplyTo] = useState<MessageType | null>(null);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+  const [typingUserName, setTypingUserName] = useState<string>("");
   const { user } = useAuth();
 
   // Fetch chat when chatId changes
@@ -29,7 +30,6 @@ const SingleChat = () => {
   useEffect(() => {
     if (!socket || !chatId) return;
 
-    // Join the chat room
     socket.emit("chat:join", chatId, (err?: string) => {
       if (err) {
         console.error("Failed to join chat:", err);
@@ -38,26 +38,27 @@ const SingleChat = () => {
       }
     });
 
-    // Leave when component unmounts or chatId changes
     return () => {
       socket.emit("chat:leave", chatId);
       console.log("Left chat room:", chatId);
     };
   }, [socket, chatId]);
 
-  // Listen for typing events
+  // Listen for typing events with user name
   useEffect(() => {
     if (!socket) return;
 
-    const handleTypingStart = (typingChatId: string) => {
-      if (typingChatId === chatId) {
+    const handleTypingStart = (data: { chatId: string; userName: string }) => {
+      if (data.chatId === chatId) {
         setIsOtherUserTyping(true);
+        setTypingUserName(data.userName);
       }
     };
 
-    const handleTypingStop = (typingChatId: string) => {
-      if (typingChatId === chatId) {
+    const handleTypingStop = (data: { chatId: string }) => {
+      if (data.chatId === chatId) {
         setIsOtherUserTyping(false);
+        setTypingUserName("");
       }
     };
 
@@ -96,27 +97,26 @@ const SingleChat = () => {
     );
   }
 
+  const isGroupChat = singleChat.chat.isGroup;
+
   return (
     <div className="h-full w-full flex flex-col">
       <ChatHeader chat={singleChat.chat} currentUserId={user?._id || null} />
-
-      {/* Typing Indicator Banner */}
-      {isOtherUserTyping && (
-        <div className="px-4 py-1 text-xs text-muted-foreground animate-pulse bg-background/50 backdrop-blur-sm border-b border-border">
-          Typing...
-        </div>
-      )}
 
       <ChatBody
         chatId={chatId}
         messages={singleChat.messages || []}
         onReply={setReplyTo}
       />
+
       <ChatFooter
         chatId={chatId}
         currentUserId={user?._id || null}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
+        isOtherUserTyping={isOtherUserTyping}
+        typingUserName={typingUserName}
+        isGroupChat={isGroupChat}
       />
     </div>
   );
