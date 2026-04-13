@@ -34,6 +34,7 @@ interface ChatState {
   addNewChat: (newChat: ChatType) => void;
   updateChatLastMessage: (chatId: string, lastMessage: MessageType) => void;
   addNewMessage: (chatId: string, message: MessageType) => void;
+  incrementUnreadCount: (chatId: string) => void; // ✅ NEW
 }
 
 export const useChat = create<ChatState>()((set, get) => ({
@@ -142,7 +143,7 @@ export const useChat = create<ChatState>()((set, get) => ({
       });
       const { userMessage } = data;
 
-      // ✅ UPDATE the temp message instead of replacing (no new element, just update properties)
+      // UPDATE the temp message
       set((state) => {
         if (!state.singleChat) return state;
 
@@ -154,7 +155,6 @@ export const useChat = create<ChatState>()((set, get) => ({
                 ? {
                     ...userMessage,
                     status: "sent",
-                    // Preserve the same _id to avoid re-mount
                     _id: tempUserId,
                   }
                 : msg,
@@ -162,6 +162,13 @@ export const useChat = create<ChatState>()((set, get) => ({
           },
         };
       });
+
+      // Reset unread count for sender
+      set((state) => ({
+        chats: state.chats.map((chat) =>
+          chat._id === chatId ? { ...chat, unreadCount: 0 } : chat,
+        ),
+      }));
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to send message");
       // Remove temp message on error
@@ -213,26 +220,43 @@ export const useChat = create<ChatState>()((set, get) => ({
     });
   },
 
-  // ✅ FIXED: Added duplicate message check
   addNewMessage: (chatId: string, message: MessageType) => {
     const chat = get().singleChat;
-    if (chat?.chat._id === chatId) {
-      // Check if message already exists to prevent duplicates
-      const messageExists = chat.messages.some((m) => m._id === message._id);
-      if (messageExists) {
-        console.log(
-          "⚠️ Message already exists, skipping duplicate:",
-          message._id,
-        );
-        return;
-      }
+    const currentUserId = useAuth.getState().user?._id;
 
-      set({
-        singleChat: {
-          chat: chat.chat,
-          messages: [...chat.messages, message],
-        },
-      });
+    // Update messages in singleChat if it's the current chat
+    if (chat?.chat._id === chatId) {
+      const messageExists = chat.messages.some((m) => m._id === message._id);
+      if (!messageExists) {
+        set({
+          singleChat: {
+            chat: chat.chat,
+            messages: [...chat.messages, message],
+          },
+        });
+      }
     }
+
+    // Update chats list: increment unreadCount only if message is NOT from current user
+    if (message.sender?._id !== currentUserId) {
+      set((state) => ({
+        chats: state.chats.map((c) =>
+          c._id === chatId
+            ? { ...c, unreadCount: (c.unreadCount || 0) + 1 }
+            : c,
+        ),
+      }));
+    }
+  },
+
+  // ✅ NEW: Direct function to increment unread count from ChatList
+  incrementUnreadCount: (chatId: string) => {
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat._id === chatId
+          ? { ...chat, unreadCount: (chat.unreadCount || 0) + 1 }
+          : chat,
+      ),
+    }));
   },
 }));

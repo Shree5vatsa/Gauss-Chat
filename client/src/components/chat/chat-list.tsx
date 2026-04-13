@@ -22,6 +22,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     isChatsLoading,
     addNewChat,
     updateChatLastMessage,
+    incrementUnreadCount, // ✅ USE THIS
   } = useChat();
   const { user } = useAuth();
   const currentUserId = user?._id || null;
@@ -92,6 +93,31 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
       socket.off("chat:update", handleChatUpdate);
     };
   }, [socket, updateChatLastMessage]);
+
+  // ✅ FIXED: Listen for new messages and update unread count directly
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (message: MessageType) => {
+      console.log("🔵 ChatList - New message received:", message);
+      const currentUserId = user?._id;
+
+      // Only increment unread count if message is NOT from current user
+      if (message.sender?._id !== currentUserId) {
+        console.log("🔵 Incrementing unread count for chat:", message.chatId);
+        incrementUnreadCount(message.chatId);
+      }
+
+      // Also update last message to move chat to top
+      updateChatLastMessage(message.chatId, message);
+    };
+
+    socket.on("message:new", handleNewMessage);
+
+    return () => {
+      socket.off("message:new", handleNewMessage);
+    };
+  }, [socket, user?._id, incrementUnreadCount, updateChatLastMessage]);
 
   const handleChatClick = (chatId: string) => {
     if (onChatSelect) {
