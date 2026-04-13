@@ -34,7 +34,8 @@ interface ChatState {
   addNewChat: (newChat: ChatType) => void;
   updateChatLastMessage: (chatId: string, lastMessage: MessageType) => void;
   addNewMessage: (chatId: string, message: MessageType) => void;
-  incrementUnreadCount: (chatId: string) => void; // ✅ NEW
+  incrementUnreadCount: (chatId: string) => void;
+  resetUnreadInStore: (chatId: string) => void;
 }
 
 export const useChat = create<ChatState>()((set, get) => ({
@@ -220,11 +221,14 @@ export const useChat = create<ChatState>()((set, get) => ({
     });
   },
 
+  // Adds an incoming real-time message to the chat body (singleChat.messages).
+  // Unread count is intentionally NOT incremented here — ChatBody is only
+  // mounted when the user is actively viewing that chat, so the message is
+  // being read in real time. Unread counting is handled exclusively in
+  // handleChatUpdate (chat-list.tsx) which has the isViewingThisChat guard.
   addNewMessage: (chatId: string, message: MessageType) => {
     const chat = get().singleChat;
-    const currentUserId = useAuth.getState().user?._id;
 
-    // Update messages in singleChat if it's the current chat
     if (chat?.chat._id === chatId) {
       const messageExists = chat.messages.some((m) => m._id === message._id);
       if (!messageExists) {
@@ -236,26 +240,22 @@ export const useChat = create<ChatState>()((set, get) => ({
         });
       }
     }
-
-    // Update chats list: increment unreadCount only if message is NOT from current user
-    if (message.sender?._id !== currentUserId) {
-      set((state) => ({
-        chats: state.chats.map((c) =>
-          c._id === chatId
-            ? { ...c, unreadCount: (c.unreadCount || 0) + 1 }
-            : c,
-        ),
-      }));
-    }
   },
 
-  // ✅ NEW: Direct function to increment unread count from ChatList
   incrementUnreadCount: (chatId: string) => {
     set((state) => ({
       chats: state.chats.map((chat) =>
         chat._id === chatId
           ? { ...chat, unreadCount: (chat.unreadCount || 0) + 1 }
           : chat,
+      ),
+    }));
+  },
+
+  resetUnreadInStore: (chatId: string) => {
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat._id === chatId ? { ...chat, unreadCount: 0 } : chat,
       ),
     }));
   },

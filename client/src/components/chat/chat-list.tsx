@@ -83,8 +83,18 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
       chatId: string;
       lastMessage: MessageType;
     }) => {
-      console.log("Received update on chat", data.lastMessage);
       updateChatLastMessage(data.chatId, data.lastMessage);
+
+      // ✅ Increment unread count here — chat:update is delivered via user:${userId}
+      // room so it is ALWAYS received, unlike message:new which goes to the chat
+      // room that Bob leaves when he navigates away from a chat window.
+      const isFromOtherUser = data.lastMessage?.sender?._id !== currentUserId;
+      const isViewingThisChat =
+        useChat.getState().singleChat?.chat._id === data.chatId;
+
+      if (isFromOtherUser && !isViewingThisChat) {
+        incrementUnreadCount(data.chatId);
+      }
     };
 
     socket.on("chat:update", handleChatUpdate);
@@ -92,23 +102,16 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     return () => {
       socket.off("chat:update", handleChatUpdate);
     };
-  }, [socket, updateChatLastMessage]);
+  }, [socket, currentUserId, updateChatLastMessage, incrementUnreadCount]);
 
-  // ✅ FIXED: Listen for new messages and update unread count directly
+  // message:new is still used to update the last-message preview text in the
+  // chat list for the case where the user IS in the chat room (i.e. they opened
+  // a chat and came back to the list without navigating away).  Unread count is
+  // intentionally NOT driven from here — see handleChatUpdate above.
   useEffect(() => {
     if (!socket) return;
 
     const handleNewMessage = (message: MessageType) => {
-      console.log("🔵 ChatList - New message received:", message);
-      const currentUserId = user?._id;
-
-      // Only increment unread count if message is NOT from current user
-      if (message.sender?._id !== currentUserId) {
-        console.log("🔵 Incrementing unread count for chat:", message.chatId);
-        incrementUnreadCount(message.chatId);
-      }
-
-      // Also update last message to move chat to top
       updateChatLastMessage(message.chatId, message);
     };
 
@@ -117,7 +120,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     return () => {
       socket.off("message:new", handleNewMessage);
     };
-  }, [socket, user?._id, incrementUnreadCount, updateChatLastMessage]);
+  }, [socket, updateChatLastMessage]);
 
   const handleChatClick = (chatId: string) => {
     if (onChatSelect) {
@@ -183,7 +186,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
           ) : (
             filteredChats?.map((chat) => (
               <ChatListItem
-                key={chat._id}
+                key={`${chat._id}-${chat.unreadCount}`}
                 chat={chat}
                 currentUserId={currentUserId}
                 onClick={() => handleChatClick(chat._id)}

@@ -13,7 +13,7 @@ import { API } from "@/lib/axios-client";
 const SingleChat = () => {
   const chatId = useChatId();
   const { socket } = useSocket();
-  const { fetchSingleChat, singleChat, isSingleChatLoading } = useChat();
+  const { fetchSingleChat, singleChat, isSingleChatLoading, resetUnreadInStore } = useChat();
   const [replyTo, setReplyTo] = useState<MessageType | null>(null);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [typingUserName, setTypingUserName] = useState<string>("");
@@ -27,14 +27,17 @@ const SingleChat = () => {
     }
   }, [chatId, fetchSingleChat]);
 
-  // ✅ Reset unread count when chat is opened
+  // Reset unread count when chat is opened:
+  // 1. resetUnreadInStore → zeroes the badge immediately in the UI (zustand)
+  // 2. API call        → persists the zero back to MongoDB
   useEffect(() => {
     if (chatId && user?._id) {
-      API.post(`/chat/${chatId}/reset-unread`)
-        .then(() => console.log("Unread count reset"))
-        .catch((err) => console.error("Failed to reset unread:", err));
+      resetUnreadInStore(chatId);
+      API.post(`/chat/${chatId}/reset-unread`).catch((err) =>
+        console.error("Failed to reset unread in DB:", err),
+      );
     }
-  }, [chatId, user]);
+  }, [chatId, user, resetUnreadInStore]);
 
   // Join/leave chat room for real-time messages
   useEffect(() => {
@@ -81,10 +84,6 @@ const SingleChat = () => {
     };
   }, [socket, chatId]);
 
-  // Debug: log singleChat state
-  useEffect(() => {
-    console.log("singleChat state:", singleChat);
-  }, [singleChat]);
 
   if (!chatId) {
     return <EmptyState />;
