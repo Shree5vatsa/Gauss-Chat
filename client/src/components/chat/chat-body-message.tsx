@@ -17,6 +17,7 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
 
   const userId = user?._id || null;
   const isCurrentUser = message.sender?._id === userId;
+  const isSending = message.status === "sending...";
   const senderName = isCurrentUser ? "You" : message.sender?.name;
 
   const replySenderName =
@@ -34,11 +35,16 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
     isCurrentUser && "items-end",
   );
 
+  // Message bubble styling - muted when sending, full color when sent
   const messageClass = cn(
-    "min-w-[180px] px-3.5 py-2.5 text-sm break-words shadow-sm border border-border/50",
+    "min-w-[180px] px-3.5 py-2.5 text-sm break-words shadow-sm border border-border/50 transition-all duration-300",
     isCurrentUser
-      ? "bg-primary text-primary-foreground rounded-tr-xl rounded-l-xl"
-      : "bg-muted rounded-bl-xl rounded-r-xl",
+      ? isSending
+        ? "bg-primary/60 text-primary-foreground/80 rounded-tr-xl rounded-l-xl" // Muted sending
+        : "bg-primary text-primary-foreground rounded-tr-xl rounded-l-xl" // Normal sent
+      : isSending
+        ? "bg-muted/60 text-foreground/80 rounded-bl-xl rounded-r-xl" // Muted sending
+        : "bg-muted text-foreground rounded-bl-xl rounded-r-xl", // Normal received
   );
 
   const replyBoxClass = cn(

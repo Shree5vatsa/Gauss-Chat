@@ -142,36 +142,22 @@ export const useChat = create<ChatState>()((set, get) => ({
       });
       const { userMessage } = data;
 
-      // ✅ Replace temp message with real message
+      // ✅ UPDATE the temp message instead of replacing (no new element, just update properties)
       set((state) => {
         if (!state.singleChat) return state;
 
-        // Check if message already exists (from socket)
-        const messageExists = state.singleChat.messages.some(
-          (msg) => msg._id === userMessage._id,
-        );
-
-        if (messageExists) {
-          console.log(
-            "⚠️ Message already exists from socket, just removing temp",
-          );
-          // Just remove temp message, don't add duplicate
-          return {
-            singleChat: {
-              ...state.singleChat,
-              messages: state.singleChat.messages.filter(
-                (msg) => msg._id !== tempUserId,
-              ),
-            },
-          };
-        }
-
-        // Replace temp with real message
         return {
           singleChat: {
             ...state.singleChat,
             messages: state.singleChat.messages.map((msg) =>
-              msg._id === tempUserId ? userMessage : msg,
+              msg._id === tempUserId
+                ? {
+                    ...userMessage,
+                    status: "sent",
+                    // Preserve the same _id to avoid re-mount
+                    _id: tempUserId,
+                  }
+                : msg,
             ),
           },
         };
