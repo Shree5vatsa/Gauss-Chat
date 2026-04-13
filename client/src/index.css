@@ -46,14 +46,13 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-base: var(--sidebar-base);
-  
 }
 
 :root {
   --radius: 0.65rem;
-  --background: oklch(92.884% 0.0054 16.178);   /* slightly gray, not pure white */
-  --card: oklch(1 0 0);                 /* pure white card */
-  --border: oklch(0.85 0.01 286);  
+  --background: oklch(92.884% 0.0054 16.178);
+  --card: oklch(1 0 0);
+  --border: oklch(0.85 0.01 286);
   --foreground: oklch(0.141 0.005 285.823);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
@@ -87,7 +86,6 @@ body {
 }
 
 .dark {
-  
   --background: oklch(29.329% 0.0181 285.213);
   --card: oklch(19.064% 0.01614 284.757);
   --border: oklch(1 0 0 / 20%);
@@ -95,7 +93,7 @@ body {
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
- --primary: oklch(33.617% 0.07258 274.527);  /* ← CHANGE THIS LINE */
+  --primary: oklch(33.617% 0.07258 274.527);
   --primary-foreground: oklch(0.97 0.014 254.604);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
@@ -121,7 +119,6 @@ body {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.439 0 0);
 }
-
 
 @layer base {
   * {
@@ -164,27 +161,22 @@ body {
   animation-delay: 4s;
 }
 
-.scrollbar-hide {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
+/* Filter Chips Scrollbar - Minimal, matches chat body */
 .scrollbar-hide::-webkit-scrollbar {
-  height: 4px;
+  height: 6px;
 }
 
 .scrollbar-hide::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 10px;
 }
 
 .scrollbar-hide::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 10px;
 }
 
 .scrollbar-hide::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .scrollbar-hide::-webkit-scrollbar-button {
@@ -193,6 +185,73 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar-corner {
   background: transparent;
-  display: none;
+}
 
+/* For Firefox */
+.scrollbar-hide {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Dark mode */
+.dark .scrollbar-hide::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .scrollbar-hide::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .scrollbar-hide {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Chat Body Scrollbar - Minimal, no background */
+.chat-body-scroll::-webkit-scrollbar {
+  width: 50px;
+}
+
+.chat-body-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.chat-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.chat-body-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+.chat-body-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* For Firefox */
+.chat-body-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Dark mode - subtle white thumb, no background */
+.dark .chat-body-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark .chat-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.dark .chat-body-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .chat-body-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }

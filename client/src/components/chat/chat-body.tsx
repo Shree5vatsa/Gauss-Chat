@@ -96,7 +96,7 @@ const ChatBody = ({
   const typingText = getTypingText();
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background">
+    <div className="flex-1 overflow-y-auto bg-background chat-body-scroll">
       <div className="w-full max-w-4xl mx-auto flex flex-col px-4 py-6">
         {messages.map((message) => (
           <ChatBodyMessage
