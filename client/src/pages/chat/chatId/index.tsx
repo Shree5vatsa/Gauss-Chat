@@ -107,6 +107,9 @@ const SingleChat = () => {
         chatId={chatId}
         messages={singleChat.messages || []}
         onReply={setReplyTo}
+        isOtherUserTyping={isOtherUserTyping}
+        typingUserName={typingUserName}
+        isGroupChat={isGroupChat}
       />
 
       <ChatFooter
@@ -114,9 +117,6 @@ const SingleChat = () => {
         currentUserId={user?._id || null}
         replyTo={replyTo}
         onCancelReply={() => setReplyTo(null)}
-        isOtherUserTyping={isOtherUserTyping}
-        typingUserName={typingUserName}
-        isGroupChat={isGroupChat}
       />
     </div>
   );

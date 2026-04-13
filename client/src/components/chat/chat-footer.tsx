@@ -11,15 +11,13 @@ import { Input } from "../ui/input";
 import ChatReplyBar from "./chat-reply-bar";
 import { useChat } from "@/hooks/useChat";
 import { useSocket } from "@/hooks/useSocket";
+import { useAuth } from "@/hooks/useAuth"; // ✅ ADD THIS IMPORT
 
 interface Props {
   chatId: string | null;
   currentUserId: string | null;
   replyTo: MessageType | null;
   onCancelReply: () => void;
-  isOtherUserTyping?: boolean;
-  typingUserName?: string;
-  isGroupChat?: boolean;
 }
 
 const ChatFooter = ({
@@ -27,9 +25,6 @@ const ChatFooter = ({
   currentUserId,
   replyTo,
   onCancelReply,
-  isOtherUserTyping = false,
-  typingUserName = "",
-  isGroupChat = false,
 }: Props) => {
   const messageSchema = z.object({
     message: z.string().optional(),
@@ -37,6 +32,7 @@ const ChatFooter = ({
 
   const { sendMessage, isSendingMsg } = useChat();
   const { socket } = useSocket();
+  const { user } = useAuth(); // ✅ GET USER FROM AUTH
 
   const [image, setImage] = useState<string | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,8 +68,8 @@ const ChatFooter = ({
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-    // Get user name from auth
-    const userName = currentUserId;
+    // ✅ SEND THE ACTUAL USER NAME, NOT THE ID
+    const userName = user?.name || "Someone";
 
     socket.emit("typing:start", { chatId, userName });
 
@@ -107,18 +103,6 @@ const ChatFooter = ({
     handleRemoveImage();
     form.reset();
   };
-
-  // Get display text for typing indicator
-  const getTypingText = () => {
-    if (!isOtherUserTyping) return null;
-
-    if (isGroupChat && typingUserName) {
-      return `${typingUserName} is typing...`;
-    }
-    return "Typing...";
-  };
-
-  const typingText = getTypingText();
 
   return (
     <>
@@ -157,15 +141,6 @@ const ChatFooter = ({
                 <X className="h-3 w-3" />
               </Button>
             </div>
-          </div>
-        )}
-
-        {/* Other User Typing Indicator - shows above input */}
-        {typingText && (
-          <div className="max-w-6xl mx-auto px-4 pb-1">
-            <span className="text-xs text-muted-foreground animate-pulse">
-              {typingText}
-            </span>
           </div>
         )}
 
