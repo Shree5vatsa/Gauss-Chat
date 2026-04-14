@@ -20,12 +20,11 @@ export const AccountSettingsModal = () => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Profile form state
   const [firstName, setFirstName] = useState(user?.name?.split(" ")[0] || "");
   const [lastName, setLastName] = useState(user?.name?.split(" ")[1] || "");
-  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
 
   // Password form state
@@ -46,17 +45,21 @@ export const AccountSettingsModal = () => {
     return `${localPart.slice(0, 2)}***@${domain}`;
   };
 
-  // Handle avatar upload
+  // Handle avatar file selection (convert to base64)
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setAvatar(file);
-      const preview = URL.createObjectURL(file);
-      setAvatarPreview(preview);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setAvatarPreview(base64String);
+      setAvatarBase64(base64String);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Update profile (name + avatar)
+  // Update profile (name + avatar as base64)
   const handleUpdateProfile = async () => {
     const fullName = `${firstName} ${lastName}`.trim();
     if (!fullName) {
@@ -66,26 +69,22 @@ export const AccountSettingsModal = () => {
 
     setIsLoading(true);
     try {
-      let avatarUrl = user?.avatar;
-
-      // Upload avatar if changed
-      if (avatar) {
-        const formData = new FormData();
-        formData.append("avatar", avatar);
-        const uploadRes = await API.post("/upload/avatar", formData);
-        avatarUrl = uploadRes.data.url;
+      const payload: { name: string; avatar?: string } = { name: fullName };
+      if (avatarBase64) {
+        payload.avatar = avatarBase64;
       }
 
-      await API.put("/user/profile", {
-        name: fullName,
-        avatar: avatarUrl,
-      });
+      const response = await API.put("/user/profile", payload);
 
       // Update local user state
       const { user: currentUser } = useAuth.getState();
       if (currentUser) {
         useAuth.setState({
-          user: { ...currentUser, name: fullName, avatar: avatarUrl },
+          user: {
+            ...currentUser,
+            name: fullName,
+            avatar: response.data.user.avatar,
+          },
         });
       }
 
@@ -130,7 +129,6 @@ export const AccountSettingsModal = () => {
     setIsLoading(true);
     try {
       await API.post("/auth/change-password", {
-        email: emailForPassword,
         newPassword,
       });
       toast.success("Password changed successfully! Please login again.");
@@ -329,9 +327,7 @@ export const AccountSettingsModal = () => {
 
           {/* Delete Account Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-destructive">
-              Delete Account
-            </h3>
+            
 
             {!showDeleteConfirm ? (
               <Button
