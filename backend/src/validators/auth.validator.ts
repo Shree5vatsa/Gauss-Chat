@@ -25,6 +25,10 @@ export const loginSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
 });
+export const changePasswordSchema = z.object({
+  newPassword: passwordSchema,
+});
 
 export type RegisterSchemaType = z.infer<typeof registerSchema>;
 export type LoginSchemaType = z.infer<typeof loginSchema>;
+export type ChangePasswordSchemaType = z.infer<typeof changePasswordSchema>;

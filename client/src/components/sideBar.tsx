@@ -12,6 +12,7 @@ import {
 import AvatarWithBadge from "./avatarWithBadge";
 import HamburgerButton from "./ui/hamburger-button";
 import { ThemeToggle } from "./theme-toggle";
+import { AccountSettingsModal } from "./account-settings-modal";
 
 interface SidebarProps {
   onToggleChatList?: () => void;
@@ -44,8 +45,12 @@ const Sidebar = ({ onToggleChatList }: SidebarProps) => {
           <ThemeToggle />
         </div>
 
-        {/* Bottom Section - Avatar */}
+        {/* Bottom Section - Avatar & Settings */}
         <div className="flex flex-col items-center gap-6 w-full mb-2">
+          {/* Account Settings Modal */}
+          <AccountSettingsModal />
+
+          {/* Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div
@@ -71,7 +76,7 @@ const Sidebar = ({ onToggleChatList }: SidebarProps) => {
               sideOffset={18}
             >
               <DropdownMenuLabel className="font-medium text-muted-foreground text-xs uppercase tracking-wider px-2 py-1.5">
-                Account Settings
+                {user?.name || "Account"}
               </DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={logout}
