@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { API } from "@/lib/axios-client";
-import { Settings } from "lucide-react";
+import { Settings, User, Key, Trash2, Upload } from "lucide-react";
 
 export const AccountSettingsModal = () => {
   const { user, logout } = useAuth();
@@ -37,7 +37,7 @@ export const AccountSettingsModal = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
-  // Mask email (show only first 2 chars + *** + domain)
+  // Mask email
   const maskEmail = (email: string) => {
     if (!email) return "";
     const [localPart, domain] = email.split("@");
@@ -45,7 +45,6 @@ export const AccountSettingsModal = () => {
     return `${localPart.slice(0, 2)}***@${domain}`;
   };
 
-  // Handle avatar file selection (convert to base64)
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -59,7 +58,6 @@ export const AccountSettingsModal = () => {
     reader.readAsDataURL(file);
   };
 
-  // Update profile (name + avatar as base64)
   const handleUpdateProfile = async () => {
     const fullName = `${firstName} ${lastName}`.trim();
     if (!fullName) {
@@ -76,7 +74,6 @@ export const AccountSettingsModal = () => {
 
       const response = await API.put("/user/profile", payload);
 
-      // Update local user state
       const { user: currentUser } = useAuth.getState();
       if (currentUser) {
         useAuth.setState({
@@ -97,7 +94,6 @@ export const AccountSettingsModal = () => {
     }
   };
 
-  // Verify email for password change
   const handleVerifyEmail = () => {
     if (!emailForPassword) {
       toast.error("Please enter your email");
@@ -111,7 +107,6 @@ export const AccountSettingsModal = () => {
     toast.success("Email verified! You can now change your password.");
   };
 
-  // Change password
   const handleChangePassword = async () => {
     if (!newPassword) {
       toast.error("Please enter a new password");
@@ -128,9 +123,7 @@ export const AccountSettingsModal = () => {
 
     setIsLoading(true);
     try {
-      await API.post("/auth/change-password", {
-        newPassword,
-      });
+      await API.post("/auth/change-password", { newPassword });
       toast.success("Password changed successfully! Please login again.");
       logout();
       setIsOpen(false);
@@ -143,7 +136,6 @@ export const AccountSettingsModal = () => {
     }
   };
 
-  // Delete account
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== "DELETE") {
       toast.error('Type "DELETE" to confirm');
@@ -170,25 +162,37 @@ export const AccountSettingsModal = () => {
           <Settings className="w-5 h-5 text-muted-foreground" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Account Settings</DialogTitle>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0 gap-0">
+        <DialogHeader className="p-6 pb-2 border-b">
+          <DialogTitle className="text-xl font-semibold text-center">
+            Account Settings
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="p-6 space-y-8">
           {/* Profile Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-foreground">Profile</h3>
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">
+                Profile Information
+              </h3>
+            </div>
 
-            {/* Avatar */}
-            <div className="flex flex-col items-center gap-3">
-              <Avatar className="w-20 h-20">
-                <AvatarImage src={avatarPreview || user?.avatar || ""} />
-                <AvatarFallback className="text-2xl">
-                  {user?.name?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex flex-col items-center gap-3 pb-2">
               <div className="relative">
+                <Avatar className="w-24 h-24 ring-2 ring-primary/20 ring-offset-2">
+                  <AvatarImage src={avatarPreview || user?.avatar || ""} />
+                  <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                    {user?.name?.charAt(0) || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors shadow-sm"
+                >
+                  <Upload className="w-3 h-3" />
+                </label>
                 <input
                   type="file"
                   accept="image/*"
@@ -196,44 +200,44 @@ export const AccountSettingsModal = () => {
                   className="hidden"
                   id="avatar-upload"
                 />
-                <label
-                  htmlFor="avatar-upload"
-                  className="text-xs text-primary cursor-pointer hover:underline"
-                >
-                  Change Avatar
-                </label>
               </div>
             </div>
 
-            {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>First Name</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  First Name
+                </Label>
                 <Input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="First name"
+                  className="h-10"
                 />
               </div>
-              <div>
-                <Label>Last Name</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Last Name
+                </Label>
                 <Input
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Last name"
+                  className="h-10"
                 />
               </div>
             </div>
 
-            {/* Email (masked) */}
-            <div>
-              <Label>Email</Label>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Email Address
+              </Label>
               <Input
                 value={maskEmail(user?.email || "")}
                 disabled
-                className="bg-muted"
+                className="bg-muted/50 h-10"
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 Email cannot be changed
               </p>
             </div>
@@ -241,7 +245,7 @@ export const AccountSettingsModal = () => {
             <Button
               onClick={handleUpdateProfile}
               disabled={isLoading}
-              className="w-full"
+              className="w-full mt-2"
             >
               {isLoading ? <Spinner className="w-4 h-4 mr-2" /> : null}
               Save Changes
@@ -253,21 +257,27 @@ export const AccountSettingsModal = () => {
 
           {/* Change Password Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-foreground">
-              Change Password
-            </h3>
+            <div className="flex items-center gap-2">
+              <Key className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">
+                Change Password
+              </h3>
+            </div>
 
             {!emailVerified ? (
-              <>
-                <div>
-                  <Label>Verify Email</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Verify Email
+                  </Label>
                   <Input
                     type="email"
                     placeholder="Enter your account email"
                     value={emailForPassword}
                     onChange={(e) => setEmailForPassword(e.target.value)}
+                    className="h-10"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground">
                     Enter your email to verify identity
                   </p>
                 </div>
@@ -278,25 +288,31 @@ export const AccountSettingsModal = () => {
                 >
                   Verify Email
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
-                <div>
-                  <Label>New Password</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    New Password
+                  </Label>
                   <Input
                     type="password"
                     placeholder="••••••"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    className="h-10"
                   />
                 </div>
-                <div>
-                  <Label>Confirm Password</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Confirm Password
+                  </Label>
                   <Input
                     type="password"
                     placeholder="••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="h-10"
                   />
                 </div>
                 <Button
@@ -318,7 +334,7 @@ export const AccountSettingsModal = () => {
                 >
                   Cancel
                 </button>
-              </>
+              </div>
             )}
           </div>
 
@@ -327,8 +343,6 @@ export const AccountSettingsModal = () => {
 
           {/* Delete Account Section */}
           <div className="space-y-4">
-            
-
             {!showDeleteConfirm ? (
               <Button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -338,16 +352,20 @@ export const AccountSettingsModal = () => {
                 Delete Account
               </Button>
             ) : (
-              <>
-                <div>
-                  <Label>Type "DELETE" to confirm</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Type <span className="font-mono font-bold">DELETE</span> to
+                    confirm
+                  </Label>
                   <Input
                     placeholder="DELETE"
                     value={deleteConfirmText}
                     onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    className="h-10 font-mono"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Button
                     onClick={() => setShowDeleteConfirm(false)}
                     variant="outline"
@@ -368,7 +386,7 @@ export const AccountSettingsModal = () => {
                     )}
                   </Button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
