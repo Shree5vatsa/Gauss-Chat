@@ -161,7 +161,7 @@ body {
   animation-delay: 4s;
 }
 
-/* Filter Chips Scrollbar - Minimal, matches chat body */
+/* Filter Chips Scrollbar */
 .scrollbar-hide::-webkit-scrollbar {
   height: 6px;
 }
@@ -187,13 +187,11 @@ body {
   background: transparent;
 }
 
-/* For Firefox */
 .scrollbar-hide {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
-/* Dark mode */
 .dark .scrollbar-hide::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
 }
@@ -206,9 +204,9 @@ body {
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
-/* Chat Body Scrollbar - Minimal, no background */
+/* Chat Body Scrollbar */
 .chat-body-scroll::-webkit-scrollbar {
-  width: 50px;
+  width: 4px;
 }
 
 .chat-body-scroll::-webkit-scrollbar-track {
@@ -232,13 +230,11 @@ body {
   background: transparent;
 }
 
-/* For Firefox */
 .chat-body-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
-/* Dark mode - subtle white thumb, no background */
 .dark .chat-body-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -253,5 +249,48 @@ body {
 }
 
 .dark .chat-body-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Account Settings Modal Scrollbar */
+.custom-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.custom-scroll::-webkit-scrollbar-button {
+  display: none;
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.dark .custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .custom-scroll {
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }

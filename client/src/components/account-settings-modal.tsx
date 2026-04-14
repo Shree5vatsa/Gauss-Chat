@@ -162,232 +162,236 @@ export const AccountSettingsModal = () => {
           <Settings className="w-5 h-5 text-muted-foreground" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-0 gap-0">
-        <DialogHeader className="p-6 pb-2 border-b">
-          <DialogTitle className="text-xl font-semibold text-center">
+      <DialogContent className="sm:max-w-md p-0 gap-0 rounded-2xl">
+        {/* Fixed Header */}
+        <DialogHeader className="sticky top-0 z-10 p-5 pb-3 border-b bg-popover rounded-t-2xl">
+          <DialogTitle className="text-lg font-semibold text-center">
             Account Settings
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-6 space-y-8">
-          {/* Profile Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Profile Information
-              </h3>
-            </div>
-
-            <div className="flex flex-col items-center gap-3 pb-2">
-              <div className="relative">
-                <Avatar className="w-24 h-24 ring-2 ring-primary/20 ring-offset-2">
-                  <AvatarImage src={avatarPreview || user?.avatar || ""} />
-                  <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                    {user?.name?.charAt(0) || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <label
-                  htmlFor="avatar-upload"
-                  className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors shadow-sm"
-                >
-                  <Upload className="w-3 h-3" />
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                  id="avatar-upload"
-                />
+        {/* Scrollable Content with minimal scrollbar */}
+        <div className="max-h-[70vh] overflow-y-auto custom-scroll">
+          <div className="p-5 space-y-6">
+            {/* Profile Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">
+                  Profile Information
+                </h3>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  First Name
-                </Label>
-                <Input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="First name"
-                  className="h-10"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Last Name
-                </Label>
-                <Input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Last name"
-                  className="h-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Email Address
-              </Label>
-              <Input
-                value={maskEmail(user?.email || "")}
-                disabled
-                className="bg-muted/50 h-10"
-              />
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed
-              </p>
-            </div>
-
-            <Button
-              onClick={handleUpdateProfile}
-              disabled={isLoading}
-              className="w-full mt-2"
-            >
-              {isLoading ? <Spinner className="w-4 h-4 mr-2" /> : null}
-              Save Changes
-            </Button>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t" />
-
-          {/* Change Password Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Key className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Change Password
-              </h3>
-            </div>
-
-            {!emailVerified ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">
-                    Verify Email
-                  </Label>
-                  <Input
-                    type="email"
-                    placeholder="Enter your account email"
-                    value={emailForPassword}
-                    onChange={(e) => setEmailForPassword(e.target.value)}
-                    className="h-10"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Enter your email to verify identity
-                  </p>
-                </div>
-                <Button
-                  onClick={handleVerifyEmail}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Verify Email
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">
-                    New Password
-                  </Label>
-                  <Input
-                    type="password"
-                    placeholder="••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="h-10"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">
-                    Confirm Password
-                  </Label>
-                  <Input
-                    type="password"
-                    placeholder="••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="h-10"
-                  />
-                </div>
-                <Button
-                  onClick={handleChangePassword}
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? <Spinner className="w-4 h-4 mr-2" /> : null}
-                  Update Password
-                </Button>
-                <button
-                  onClick={() => {
-                    setEmailVerified(false);
-                    setEmailForPassword("");
-                    setNewPassword("");
-                    setConfirmPassword("");
-                  }}
-                  className="text-xs text-muted-foreground hover:text-primary text-center w-full"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="border-t" />
-
-          {/* Delete Account Section */}
-          <div className="space-y-4">
-            {!showDeleteConfirm ? (
-              <Button
-                onClick={() => setShowDeleteConfirm(true)}
-                variant="destructive"
-                className="w-full"
-              >
-                Delete Account
-              </Button>
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">
-                    Type <span className="font-mono font-bold">DELETE</span> to
-                    confirm
-                  </Label>
-                  <Input
-                    placeholder="DELETE"
-                    value={deleteConfirmText}
-                    onChange={(e) => setDeleteConfirmText(e.target.value)}
-                    className="h-10 font-mono"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    variant="outline"
-                    className="flex-1"
+              <div className="flex flex-col items-center gap-3 pb-2">
+                <div className="relative">
+                  <Avatar className="w-20 h-20 ring-2 ring-primary/20">
+                    <AvatarImage src={avatarPreview || user?.avatar || ""} />
+                    <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                      {user?.name?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <label
+                    htmlFor="avatar-upload"
+                    className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors shadow-sm"
                   >
-                    Cancel
-                  </Button>
+                    <Upload className="w-3 h-3" />
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    First Name
+                  </Label>
+                  <Input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Last Name
+                  </Label>
+                  <Input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    className="h-9 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Email Address
+                </Label>
+                <Input
+                  value={maskEmail(user?.email || "")}
+                  disabled
+                  className="bg-muted/50 h-9 text-sm"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Email cannot be changed
+                </p>
+              </div>
+
+              <Button
+                onClick={handleUpdateProfile}
+                disabled={isLoading}
+                className="w-full h-9 text-sm mt-2"
+              >
+                {isLoading ? <Spinner className="w-3.5 h-3.5 mr-2" /> : null}
+                Save Changes
+              </Button>
+            </div>
+
+            <div className="border-t" />
+
+            {/* Change Password Section */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Key className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">
+                  Change Password
+                </h3>
+              </div>
+
+              {!emailVerified ? (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Verify Email
+                    </Label>
+                    <Input
+                      type="email"
+                      placeholder="Enter your account email"
+                      value={emailForPassword}
+                      onChange={(e) => setEmailForPassword(e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter your email to verify identity
+                    </p>
+                  </div>
                   <Button
-                    onClick={handleDeleteAccount}
-                    variant="destructive"
-                    className="flex-1"
+                    onClick={handleVerifyEmail}
+                    variant="outline"
+                    className="w-full h-9 text-sm"
+                  >
+                    Verify Email
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      New Password
+                    </Label>
+                    <Input
+                      type="password"
+                      placeholder="••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Confirm Password
+                    </Label>
+                    <Input
+                      type="password"
+                      placeholder="••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="h-9 text-sm"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleChangePassword}
                     disabled={isLoading}
+                    className="w-full h-9 text-sm"
                   >
                     {isLoading ? (
-                      <Spinner className="w-4 h-4" />
-                    ) : (
-                      "Confirm Delete"
-                    )}
+                      <Spinner className="w-3.5 h-3.5 mr-2" />
+                    ) : null}
+                    Update Password
                   </Button>
+                  <button
+                    onClick={() => {
+                      setEmailVerified(false);
+                      setEmailForPassword("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                    }}
+                    className="text-xs text-muted-foreground hover:text-primary text-center w-full"
+                  >
+                    Cancel
+                  </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <div className="border-t" />
+
+            {/* Delete Account Section */}
+            <div className="space-y-3">
+              {!showDeleteConfirm ? (
+                <Button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  variant="destructive"
+                  className="w-full h-9 text-sm"
+                >
+                  Delete Account
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Type <span className="font-mono font-bold">DELETE</span>{" "}
+                      to confirm
+                    </Label>
+                    <Input
+                      placeholder="DELETE"
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      className="h-9 text-sm font-mono"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      variant="outline"
+                      className="flex-1 h-9 text-sm"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleDeleteAccount}
+                      variant="destructive"
+                      className="flex-1 h-9 text-sm"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <Spinner className="w-3.5 h-3.5" />
+                      ) : (
+                        "Confirm Delete"
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
