@@ -36,6 +36,7 @@ interface ChatState {
   addNewMessage: (chatId: string, message: MessageType) => void;
   incrementUnreadCount: (chatId: string) => void;
   resetUnreadInStore: (chatId: string) => void;
+  removeChatsWithParticipant: (userId: string) => void;
 }
 
 export const useChat = create<ChatState>()((set, get) => ({
@@ -257,6 +258,17 @@ export const useChat = create<ChatState>()((set, get) => ({
       chats: state.chats.map((chat) =>
         chat._id === chatId ? { ...chat, unreadCount: 0 } : chat,
       ),
+    }));
+  },
+
+  removeChatsWithParticipant: (userId: string) => {
+    set((state) => ({
+      chats: state.chats.filter((chat) => {
+        // Check if the deleted user is a participant
+        const isParticipant = chat.participants.some((p) => p._id === userId);
+        // Keep chats where the deleted user is NOT a participant
+        return !isParticipant;
+      }),
     }));
   },
 }));

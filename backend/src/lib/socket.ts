@@ -159,3 +159,10 @@ export const emitLastMessageToParticipants = (
     io.to(`user:${participantId}`).emit("chat:update", payload);
   }
 };
+export const emitUserAccountDeleted = (
+  recipientId: string,
+  deletedUserId: string,
+) => {
+  const io = getIO();
+  io.to(`user:${recipientId}`).emit("user:account-deleted", { deletedUserId });
+};

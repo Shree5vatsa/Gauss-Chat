@@ -22,7 +22,8 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     isChatsLoading,
     addNewChat,
     updateChatLastMessage,
-    incrementUnreadCount, // ✅ USE THIS
+    incrementUnreadCount,
+    removeChatsWithParticipant,
   } = useChat();
   const { user } = useAuth();
   const currentUserId = user?._id || null;
@@ -61,6 +62,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     fetchChats();
   }, [fetchChats]);
 
+  // Handle new chat creation
   useEffect(() => {
     if (!socket) return;
 
@@ -76,6 +78,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     };
   }, [addNewChat, socket]);
 
+  // Handle chat update (last message + unread count)
   useEffect(() => {
     if (!socket) return;
 
@@ -85,9 +88,6 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     }) => {
       updateChatLastMessage(data.chatId, data.lastMessage);
 
-      // ✅ Increment unread count here — chat:update is delivered via user:${userId}
-      // room so it is ALWAYS received, unlike message:new which goes to the chat
-      // room that Bob leaves when he navigates away from a chat window.
       const isFromOtherUser = data.lastMessage?.sender?._id !== currentUserId;
       const isViewingThisChat =
         useChat.getState().singleChat?.chat._id === data.chatId;
@@ -104,10 +104,7 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     };
   }, [socket, currentUserId, updateChatLastMessage, incrementUnreadCount]);
 
-  // message:new is still used to update the last-message preview text in the
-  // chat list for the case where the user IS in the chat room (i.e. they opened
-  // a chat and came back to the list without navigating away).  Unread count is
-  // intentionally NOT driven from here — see handleChatUpdate above.
+  // Handle new messages (update last message preview)
   useEffect(() => {
     if (!socket) return;
 
@@ -121,6 +118,24 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
       socket.off("message:new", handleNewMessage);
     };
   }, [socket, updateChatLastMessage]);
+
+  // ✅ Handle account deletion - remove chats with deleted user
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleAccountDeleted = (data: { deletedUserId: string }) => {
+      console.log("🔴 User account deleted:", data.deletedUserId);
+      removeChatsWithParticipant(data.deletedUserId);
+      // Refetch to ensure consistency
+      fetchChats();
+    };
+
+    socket.on("user:account-deleted", handleAccountDeleted);
+
+    return () => {
+      socket.off("user:account-deleted", handleAccountDeleted);
+    };
+  }, [socket, removeChatsWithParticipant, fetchChats]);
 
   const handleChatClick = (chatId: string) => {
     if (onChatSelect) {

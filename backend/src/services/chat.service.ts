@@ -80,8 +80,16 @@ export const getUserChatService = async (userId: string) => {
     })
     .sort({ updatedAt: -1 });
 
-  // ✅ ADD UNREAD COUNT FOR CURRENT USER
-  const chatsWithUnread = chats.map((chat) => {
+  // FILTER OUT CHATS WHERE ANY PARTICIPANT IS NULL (DELETED USER)
+  const validChats = chats.filter((chat) => {
+    // Check if all participants exist (not null)
+    const allParticipantsExist = chat.participants.every((p) => p !== null);
+    // For 1-on-1 chats, ensure there's at least one other participant
+    if (!chat.isGroup && chat.participants.length < 2) return false;
+    return allParticipantsExist;
+  });
+
+  const chatsWithUnread = validChats.map((chat) => {
     const chatObj = chat.toObject();
     const unreadCount = chat.unreadCount?.get(userId) || 0;
     return {
