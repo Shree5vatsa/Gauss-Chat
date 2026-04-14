@@ -17,9 +17,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useTheme } from "@/components/theme-provider";
+import bgImageLight from "@/assets/bg2.jpg";
+import bgImageDark from "@/assets/bg2dark.jpg";
 
 const SignIn = () => {
   const { login, isLoggingIn } = useAuth();
+  const { theme } = useTheme();
+  const [bgImage, setBgImage] = useState(bgImageLight);
+
+  useEffect(() => {
+    setBgImage(theme === "dark" ? bgImageDark : bgImageLight);
+  }, [theme]);
 
   const formSchema = z.object({
     email: z.string().email("Invalid email").min(1, "Email is required"),
@@ -45,9 +55,16 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 p-4 sm:p-6 md:p-8">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       <div className="w-full max-w-md sm:max-w-lg md:max-w-md">
-        <Card className="border-border/50 shadow-xl">
+        <Card className="border-border/50 shadow-xl bg-card">
           <CardHeader className="text-center space-y-2 pt-8 pb-6">
             <div className="flex justify-center mb-4">
               <Logo imgClass="size-20 sm:size-24 md:size-28" showText={false} />
