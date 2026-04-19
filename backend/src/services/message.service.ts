@@ -85,7 +85,7 @@ export const sendMessageService = async (
   const allParticipantIds = chat.participants.map((id) => id.toString());
   emitLastMessageToParticipants(allParticipantIds, chatId, newMessage);
 
-
+  // ✅ HANDLE AI RESPONSE
   if (chat.isAiChat) {
     // Get the AI participant (the bot)
     const aiParticipant = await userModel.findOne({ isAI: true });
@@ -130,7 +130,7 @@ export const sendMessageService = async (
           select: "content image sender",
           populate: {
             path: "sender",
-            select: "name avatar",
+            select: "name avatar isAI",
           },
         },
       ]);
@@ -138,15 +138,9 @@ export const sendMessageService = async (
       // Update lastMessage in chat
       chat.lastMessage = aiMessage._id as mongoose.Types.ObjectId;
 
-      // Don't increment unread for AI chat (or increment for user only)
-      // For AI chat, we want the user to see the response
-      const userParticipantId = allParticipantIds.find(
-        (id) => id !== aiParticipant._id.toString(),
-      );
-      if (userParticipantId) {
-        const currentCount = chat.unreadCount?.get(userParticipantId) || 0;
-        chat.unreadCount?.set(userParticipantId, currentCount + 1);
-      }
+      // ✅ FIXED: DO NOT increment unread count for AI responses
+      // The user is actively in the chat, so AI messages should be marked as read immediately
+      // No unread increment needed for the user
 
       await chat.save();
 
@@ -155,7 +149,6 @@ export const sendMessageService = async (
       emitLastMessageToParticipants(allParticipantIds, chatId, aiMessage);
     }
   }
-
 
   return {
     userMessage: newMessage,
