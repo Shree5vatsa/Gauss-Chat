@@ -32,6 +32,7 @@ export type CreateChatType = {
   isGroup?: boolean;
   participants?: string[];
   groupName?: string;
+  isAiChat?: boolean;
 };
 
 export type CreateMessageType = {

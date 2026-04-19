@@ -7,6 +7,7 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   avatar?: string | null;
+  isAI?: boolean; // ✅ ADD THIS
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
@@ -14,7 +15,7 @@ export interface UserDocument extends Document {
 
 /*
 Because it extends Document, instances will have:
-
+a
 _id
 .save()
 .isModified()
@@ -44,6 +45,10 @@ const userSchema = new Schema<UserDocument>(
     avatar: {
       type: String,
       default: null,
+    },
+    isAI: {
+      type: Boolean,
+      default: false,
     },
   },
   {

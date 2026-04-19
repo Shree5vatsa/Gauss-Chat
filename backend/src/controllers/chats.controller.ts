@@ -74,3 +74,22 @@ export const resetUnreadCountController = asyncHandler(
     });
   },
 );
+
+export const ensureAIUserExists = async () => {
+  const userModel = (await import("../models/user.model")).default;
+  const { hashValue } = await import("../utils/bcrypt");
+
+  const aiUser = await userModel.findOne({ isAI: true });
+  if (!aiUser) {
+    await userModel.create({
+      name: "Gauss AI Assistant",
+      email: "ai@gauss-chat.com",
+      password: await hashValue(Math.random().toString(36)),
+      isAI: true,
+      avatar: null,
+    });
+    console.log("🤖 AI User created successfully");
+  } else {
+    console.log("🤖 AI User already exists");
+  }
+};

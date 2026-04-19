@@ -4,6 +4,7 @@ import userModel from "../models/user.model";
 import { BadRequestException, NotFoundException } from "../utils/app-Error";
 import MessageModel from "../models/message.model";
 import { emitNewChatToParticipants } from "../lib/socket";
+import { hashValue } from "../utils/bcrypt";
 
 export const createChatService = async (
   userId: string,
@@ -13,14 +14,55 @@ export const createChatService = async (
     participants?: string[];
     groupName?: string;
     groupAvatar?: string;
+    isAiChat?: boolean; 
   },
 ) => {
-  const { participantId, isGroup, participants, groupName, groupAvatar } = body;
+  const {
+    participantId,
+    isGroup,
+    participants,
+    groupName,
+    groupAvatar,
+    isAiChat,
+  } = body;
 
   let chat;
   let allParticipantIds: string[] = [];
 
-  if (isGroup && participants?.length && groupName) {
+  // ✅ HANDLE AI CHAT (1-on-1 with AI)
+  if (isAiChat) {
+    // Check if AI user exists, if not create it
+    let aiUser = await userModel.findOne({ isAI: true });
+
+    if (!aiUser) {
+      aiUser = await userModel.create({
+        name: "Gauss AI Assistant",
+        email: "ai@gauss-chat.com",
+        password: await hashValue(Math.random().toString(36)),
+        isAI: true,
+        avatar: null,
+      });
+    }
+
+    allParticipantIds = [userId, aiUser._id.toString()];
+
+    // Check if AI chat already exists
+    const existingChat = await ChatModel.findOne({
+      participants: { $all: allParticipantIds, $size: 2 },
+      isAiChat: true,
+    }).populate("participants", "name avatar isAI");
+
+    if (existingChat) return existingChat;
+
+    chat = await ChatModel.create({
+      participants: allParticipantIds,
+      isGroup: false,
+      isAiChat: true,
+      createdBy: userId,
+    });
+  }
+  // ✅ EXISTING GROUP CHAT LOGIC
+  else if (isGroup && participants?.length && groupName) {
     allParticipantIds = [userId, ...participants];
 
     chat = await ChatModel.create({
@@ -31,7 +73,9 @@ export const createChatService = async (
       admin: userId,
       groupAvatar,
     });
-  } else if (participantId) {
+  }
+  // ✅ EXISTING 1-on-1 CHAT LOGIC
+  else if (participantId && !isAiChat) {
     const otherUser = await userModel.findById(participantId);
     if (!otherUser) {
       throw new NotFoundException("User not found");
@@ -43,7 +87,7 @@ export const createChatService = async (
         $all: allParticipantIds,
         $size: 2,
       },
-    }).populate("participants", "name avatar");
+    }).populate("participants", "name avatar isAI");
 
     if (existingChat) return existingChat;
 
@@ -80,11 +124,10 @@ export const getUserChatService = async (userId: string) => {
     })
     .sort({ updatedAt: -1 });
 
-  // FILTER OUT CHATS WHERE ANY PARTICIPANT IS NULL (DELETED USER)
+  
   const validChats = chats.filter((chat) => {
-    // Check if all participants exist (not null)
+   
     const allParticipantsExist = chat.participants.every((p) => p !== null);
-    // For 1-on-1 chats, ensure there's at least one other participant
     if (!chat.isGroup && chat.participants.length < 2) return false;
     return allParticipantsExist;
   });

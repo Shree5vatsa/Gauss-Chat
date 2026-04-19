@@ -11,6 +11,7 @@ import { HTTP_STATUS } from "./config/http.config";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import router from "./routes";
 import { initializeSocket } from "./lib/socket";
+import { ensureAIUserExists } from "./controllers/chats.controller";
 
 const app = express();
 const server = http.createServer(app);
@@ -48,5 +49,6 @@ app.use(errorHandler);
 
 server.listen(Env.PORT, async () => {
   await connectDB();
+  await ensureAIUserExists();
   console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
 });

@@ -3,10 +3,11 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface ChatDocument extends Document {
   participants: mongoose.Types.ObjectId[];
   isGroup: boolean;
+  isAiChat: boolean;
   groupName?: string;
   admin?: mongoose.Types.ObjectId;
   lastMessage?: mongoose.Types.ObjectId | null;
-  unreadCount: Map<string, number>; // ✅ ADD THIS - userId -> count
+  unreadCount: Map<string, number>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +26,10 @@ const chatSchema = new Schema<ChatDocument>(
       },
     },
     isGroup: {
+      type: Boolean,
+      default: false,
+    },
+    isAiChat: {
       type: Boolean,
       default: false,
     },
@@ -47,7 +52,6 @@ const chatSchema = new Schema<ChatDocument>(
       ref: "Message",
       default: null,
     },
-    // ✅ ADD THIS
     unreadCount: {
       type: Map,
       of: Number,

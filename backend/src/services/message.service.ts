@@ -7,6 +7,7 @@ import {
   emitLastMessageToParticipants,
   emitNewMessageTochatRoom,
 } from "../lib/socket";
+import userModel from "../models/user.model";
 
 export const sendMessageService = async (
   userId: string,
@@ -83,6 +84,78 @@ export const sendMessageService = async (
 
   const allParticipantIds = chat.participants.map((id) => id.toString());
   emitLastMessageToParticipants(allParticipantIds, chatId, newMessage);
+
+
+  if (chat.isAiChat) {
+    // Get the AI participant (the bot)
+    const aiParticipant = await userModel.findOne({ isAI: true });
+
+    // Check if the sender is NOT the AI (so we don't create infinite loops)
+    const isSenderAI = await userModel.findById(userId).select("isAI");
+
+    if (aiParticipant && (!isSenderAI || !isSenderAI.isAI)) {
+      // Get last 5 messages for context
+      const recentMessages = await MessageModel.find({ chatId })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("sender", "isAI");
+
+      const conversationHistory = recentMessages.reverse().map((msg) => ({
+        role: (msg.sender as any)?.isAI ? "assistant" : "user",
+        content: msg.content || "",
+      }));
+
+      // Generate AI response
+      const { getAIResponse } = await import("./ai.service");
+      const aiResponseText = await getAIResponse(
+        content || "",
+        conversationHistory,
+      );
+
+      // Create AI response message
+      const aiMessage = await MessageModel.create({
+        chatId,
+        sender: aiParticipant._id,
+        content: aiResponseText,
+        replyTo: newMessage._id,
+      });
+
+      await aiMessage.populate([
+        {
+          path: "sender",
+          select: "name avatar isAI",
+        },
+        {
+          path: "replyTo",
+          select: "content image sender",
+          populate: {
+            path: "sender",
+            select: "name avatar",
+          },
+        },
+      ]);
+
+      // Update lastMessage in chat
+      chat.lastMessage = aiMessage._id as mongoose.Types.ObjectId;
+
+      // Don't increment unread for AI chat (or increment for user only)
+      // For AI chat, we want the user to see the response
+      const userParticipantId = allParticipantIds.find(
+        (id) => id !== aiParticipant._id.toString(),
+      );
+      if (userParticipantId) {
+        const currentCount = chat.unreadCount?.get(userParticipantId) || 0;
+        chat.unreadCount?.set(userParticipantId, currentCount + 1);
+      }
+
+      await chat.save();
+
+      // Emit AI message
+      emitNewMessageTochatRoom(aiParticipant._id.toString(), chatId, aiMessage);
+      emitLastMessageToParticipants(allParticipantIds, chatId, aiMessage);
+    }
+  }
+
 
   return {
     userMessage: newMessage,
