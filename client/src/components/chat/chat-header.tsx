@@ -22,8 +22,23 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
   );
   const [isInfoOpen, setIsInfoOpen] = useState(false);
 
+  //Check if this is an AI chat
+  const isAIChat = chat.isAiChat;
+
+  //Find the AI participant
+  const aiParticipant = chat.participants.find((p) => p.isAI === true);
+  const isAI = !!aiParticipant;
+
   // Get all participant names (including current user)
   const participantNames = chat.participants.map((p) => p.name).join(", ");
+
+  // ✅ Determine what to show in subtitle
+  const getSubtitle = () => {
+    if (isAI) return "AI Assistant";
+    if (isGroup) return subheading;
+    if (isOnline) return "Online";
+    return "Offline"; // Keep for regular users
+  };
 
   return (
     <>
@@ -49,18 +64,13 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
             src={avatar}
             isGroup={isGroup}
             isOnline={isOnline}
+            isAI={isAI}
             size="w-10 h-10"
           />
 
           <div>
             <h5 className="font-semibold text-base line-clamp-1">{name}</h5>
-            <p
-              className={`text-xs ${
-                isOnline ? "text-green-500" : "text-muted-foreground"
-              }`}
-            >
-              {subheading}
-            </p>
+            <p className="text-xs text-muted-foreground">{getSubtitle()}</p>
           </div>
         </div>
 
@@ -86,15 +96,17 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
               <h4 className="text-sm font-medium text-muted-foreground">
                 Name
               </h4>
-              <p className="text-base">{name}</p>
+              <p className="text-base">{isAI ? "Gauss AI Assistant" : name}</p>
             </div>
 
             {/* Participants */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
-                {isGroup ? "Members" : "Participants"}
+                {isGroup ? "Members" : "Participant"}
               </h4>
-              <p className="text-base">{participantNames}</p>
+              <p className="text-base">
+                {isAI ? "You & AI Assistant" : participantNames}
+              </p>
             </div>
 
             {/* Chat Type */}
@@ -103,7 +115,7 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
                 Type
               </h4>
               <p className="text-base">
-                {isGroup ? "Group Chat" : "Single Chat"}
+                {isAI ? "AI Chat" : isGroup ? "Group Chat" : "Single Chat"}
               </p>
             </div>
 

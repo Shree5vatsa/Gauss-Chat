@@ -79,13 +79,12 @@ export const NewChatPopover = memo(() => {
   const handleCreateChat = async (userIdOrAIChat: string) => {
     setLoadingUserId(userIdOrAIChat);
     try {
-      // ✅ CHECK IF THIS IS AI CHAT REQUEST
       const isAIChat = userIdOrAIChat === "ai";
 
       const response = await createChat({
         isGroup: false,
         participantId: isAIChat ? undefined : userIdOrAIChat,
-        isAiChat: isAIChat, // ✅ Pass isAiChat flag
+        isAiChat: isAIChat,
       });
       if (response?._id) {
         setIsOpen(false);
@@ -191,9 +190,9 @@ export const NewChatPopover = memo(() => {
                   hover:bg-accent transition-colors
                 "
               >
-                <div className="bg-primary/10 p-2 rounded-full">
+                <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-2 rounded-full">
                   <svg
-                    className="size-4 text-primary"
+                    className="size-4 text-purple-500"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -292,15 +291,45 @@ NewChatPopover.displayName = "NewChatPopover";
 // Sub-components
 // ============================================
 
-const UserAvatar = memo(({ user }: { user: UserType }) => (
-  <>
-    <AvatarWithBadge name={user.name} src={user.avatar ?? ""} size="w-8 h-8" />
-    <div className="flex-1 min-w-0">
-      <h5 className="text-sm font-medium truncate">{user.name}</h5>
-      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-    </div>
-  </>
-));
+const UserAvatar = memo(({ user }: { user: UserType }) => {
+  // ✅ Check if this is the AI user (by email or name)
+  const isAIUser =
+    user.email === "ai@gauss-chat.com" || user.name === "Gauss AI Assistant";
+
+  return (
+    <>
+      <AvatarWithBadge
+        name={user.name}
+        src={user.avatar ?? ""}
+        size="w-8 h-8"
+        isAI={isAIUser} // ✅ Pass isAI flag
+      />
+      <div className="flex-1 min-w-0">
+        <h5 className="text-sm font-medium truncate flex items-center gap-1">
+          {isAIUser && (
+            <svg
+              className="w-3.5 h-3.5 text-purple-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+              />
+            </svg>
+          )}
+          {user.name}
+        </h5>
+        <p className="text-xs text-muted-foreground truncate">
+          {isAIUser ? "AI Assistant" : user.email}
+        </p>
+      </div>
+    </>
+  );
+});
 UserAvatar.displayName = "UserAvatar";
 
 const ChatUserItem = memo(
@@ -339,24 +368,59 @@ const GroupUserItem = memo(
     user: UserType;
     isSelected: boolean;
     onToggle: (id: string) => void;
-  }) => (
-    <label
-      role="button"
-      className="w-full flex items-center gap-3 p-2 rounded-lg
-        hover:bg-accent transition-colors cursor-pointer
-      "
-      onClick={() => onToggle(user._id)}
-    >
-      <UserAvatar user={user} />
-      <div
-        className={cn(
-          "w-4 h-4 rounded border flex items-center justify-center",
-          isSelected ? "bg-primary border-primary" : "border-muted-foreground",
-        )}
+  }) => {
+    const isAIUser =
+      user.email === "ai@gauss-chat.com" || user.name === "Gauss AI Assistant";
+
+    return (
+      <label
+        role="button"
+        className="w-full flex items-center gap-3 p-2 rounded-lg
+          hover:bg-accent transition-colors cursor-pointer
+        "
+        onClick={() => onToggle(user._id)}
       >
-        {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
-      </div>
-    </label>
-  ),
+        <AvatarWithBadge
+          name={user.name}
+          src={user.avatar ?? ""}
+          size="w-8 h-8"
+          isAI={isAIUser}
+        />
+        <div className="flex-1 min-w-0">
+          <h5 className="text-sm font-medium truncate flex items-center gap-1">
+            {isAIUser && (
+              <svg
+                className="w-3.5 h-3.5 text-purple-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                />
+              </svg>
+            )}
+            {user.name}
+          </h5>
+          <p className="text-xs text-muted-foreground truncate">
+            {isAIUser ? "AI Assistant" : user.email}
+          </p>
+        </div>
+        <div
+          className={cn(
+            "w-4 h-4 rounded border flex items-center justify-center",
+            isSelected
+              ? "bg-primary border-primary"
+              : "border-muted-foreground",
+          )}
+        >
+          {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+        </div>
+      </label>
+    );
+  },
 );
 GroupUserItem.displayName = "GroupUserItem";

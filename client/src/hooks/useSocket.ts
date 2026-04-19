@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { create } from "zustand";
+import { useAuth } from "@/hooks/useAuth";
 
 const BASE_URL =
   import.meta.env.MODE === "development" ? import.meta.env.VITE_API_URL : "/";
@@ -41,6 +42,7 @@ export const useSocket = create<SocketState>()((set, get) => ({
     });
 
     newSocket.on("online:users", (userIds) => {
+      const { user } = useAuth.getState();
       console.log("🟡 Online users received:", userIds);
       set({ onlineUsers: userIds });
     });

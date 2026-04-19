@@ -1,6 +1,7 @@
 import groupImg from "@/assets/group-chat-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { cn } from "@/lib/utils";
+import aiAssistantImg from "@/assets/ai_assistant.png";
 
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
   size?: string;
   isOnline?: boolean;
   isGroup?: boolean;
+  isAI?: boolean;
   className?: string;
 }
 
@@ -17,44 +19,36 @@ const AvatarWithBadge = ({
     src,
     isOnline,
     isGroup = false,
+    isAI = false,
     size = "w-9 h-9",
     className,
 }: Props) => {
 
-    const avatar = isGroup ? groupImg : src || "";
+   let avatar = isGroup ? groupImg : src;
+   if (isAI) {
+     avatar = aiAssistantImg;
+   }
+   const showOnlineStatus = isOnline && !isGroup && !isAI;
 
-    return (
-      <div
-        className="relative
-    shrink-0"
-      >
-        <Avatar className={size}>
-          <AvatarImage src={avatar} />
-          <AvatarFallback
-            className={cn(
-              `bg-primary/15
-    text-primary font-bold text-4xl
-    `,
-              className && className,
-            )}
-          >
-            {name?.charAt(0)?.toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+   return (
+     <div className="relative shrink-0">
+       <Avatar className={size}>
+         <AvatarImage src={avatar} />
+         <AvatarFallback
+           className={cn(
+             `bg-primary/15 text-primary font-bold text-4xl`,
+             className && className,
+           )}
+         >
+           {name?.charAt(0)?.toUpperCase()}
+         </AvatarFallback>
+       </Avatar>
 
-        {isOnline && !isGroup && (
-          <span
-            className="absolute
-          bottom-0
-          right-0
-          h-2.5 w-2.5 rounded-full
-          border-2
-          bg-green-500
-          "
-          />
-        )}
-      </div>
-    );
+       {showOnlineStatus && (
+         <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 bg-green-500" />
+       )}
+     </div>
+   );
 
 };
  
