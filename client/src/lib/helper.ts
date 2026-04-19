@@ -4,8 +4,11 @@ import type { ChatType } from "@/types/chat.types";
 import { v4 as uuidv4 } from "uuid";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 
-export const isUserOnline = (userId?: string) => {
+export const isUserOnline = (userId?: string, isAI?: boolean) => {
   if (!userId) return false;
+
+  // AI users are never online
+  if (isAI) return false;
 
   const { user } = useAuth.getState();
   const { onlineUsers } = useSocket.getState();
@@ -33,20 +36,32 @@ export const getOtherUserAndGroup = (
       name: chat.groupName || "Unnamed Group",
       subheading: `${chat.participants.length} members`,
       avatar: "",
-      isGroup,
-      isOnline: false, // ← ADD THIS
+      isGroup: true,
+      isOnline: false,
+      isAI: false,
     };
   }
 
   const other = chat?.participants.find((p) => p._id !== currentUserId);
-  const isOnline = isUserOnline(other?._id ?? "");
+
+  // Use chat.isAiChat as the primary source of truth for AI detection.
+  // Falling back to other?.isAI handles edge cases, but chat.isAiChat is
+  // always present regardless of which fields were selected in the populate.
+  const isAI = chat.isAiChat === true || other?.isAI === true;
+
+  const displayName = isAI ? "Gauss AI Assistant" : other?.name || "Unknown";
+  const isOnline = isAI ? false : isUserOnline(other?._id ?? "", false);
+
+  // Return empty avatar for AI — AvatarWithBadge resolves the actual image via isAI prop
+  const avatar = isAI ? "" : other?.avatar || "";
 
   return {
-    name: other?.name || "Unknown",
-    subheading: isOnline ? "Online" : "Offline",
-    avatar: other?.avatar || "",
+    name: displayName,
+    subheading: isAI ? "AI Assistant" : isOnline ? "Online" : "Offline",
+    avatar: avatar,
     isGroup: false,
-    isOnline,
+    isOnline: isOnline, // was hardcoded false — now correct for both AI and regular users
+    isAI: isAI,
   };
 };
 

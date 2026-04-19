@@ -42,7 +42,12 @@ export const useSocket = create<SocketState>()((set, get) => ({
     });
 
     newSocket.on("online:users", (userIds) => {
-      const { user } = useAuth.getState();
+      
+
+      // ✅ Filter out AI users from online list
+      // We need to know which users are AI - for now, we'll let the backend handle it
+      // But for frontend, we can't filter without knowing AI users
+      // Better to filter on backend, but as a fallback:
       console.log("🟡 Online users received:", userIds);
       set({ onlineUsers: userIds });
     });

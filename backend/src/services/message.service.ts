@@ -54,14 +54,14 @@ export const sendMessageService = async (
   await newMessage.populate([
     {
       path: "sender",
-      select: "name avatar",
+      select: "name avatar isAI",
     },
     {
       path: "replyTo",
       select: "content image sender",
       populate: {
         path: "sender",
-        select: "name avatar",
+        select: "name avatar isAI",
       },
     },
   ]);

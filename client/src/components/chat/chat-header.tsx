@@ -16,29 +16,17 @@ interface Props {
 
 const ChatHeader = ({ chat, currentUserId }: Props) => {
   const navigate = useNavigate();
-  const { name, subheading, avatar, isOnline, isGroup } = getOtherUserAndGroup(
-    chat,
-    currentUserId,
-  );
+
+  // ✅ Get all data from helper (includes AI detection)
+  const { name, subheading, avatar, isOnline, isGroup, isAI } =
+    getOtherUserAndGroup(chat, currentUserId);
+
+  console.log("ChatHeader Debug:", { isAI, name, avatar, chatId: chat._id });
+
   const [isInfoOpen, setIsInfoOpen] = useState(false);
-
-  //Check if this is an AI chat
-  const isAIChat = chat.isAiChat;
-
-  //Find the AI participant
-  const aiParticipant = chat.participants.find((p) => p.isAI === true);
-  const isAI = !!aiParticipant;
 
   // Get all participant names (including current user)
   const participantNames = chat.participants.map((p) => p.name).join(", ");
-
-  // ✅ Determine what to show in subtitle
-  const getSubtitle = () => {
-    if (isAI) return "AI Assistant";
-    if (isGroup) return subheading;
-    if (isOnline) return "Online";
-    return "Offline"; // Keep for regular users
-  };
 
   return (
     <>
@@ -70,7 +58,8 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
 
           <div>
             <h5 className="font-semibold text-base line-clamp-1">{name}</h5>
-            <p className="text-xs text-muted-foreground">{getSubtitle()}</p>
+            {/* ✅ Use subheading directly - it already returns "AI Assistant" for AI */}
+            <p className="text-xs text-muted-foreground">{subheading}</p>
           </div>
         </div>
 
@@ -96,7 +85,7 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
               <h4 className="text-sm font-medium text-muted-foreground">
                 Name
               </h4>
-              <p className="text-base">{isAI ? "Gauss AI Assistant" : name}</p>
+              <p className="text-base">{name}</p>
             </div>
 
             {/* Participants */}
