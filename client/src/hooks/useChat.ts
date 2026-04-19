@@ -55,7 +55,8 @@ export const useChat = create<ChatState>()((set, get) => ({
 
     try {
       const { data } = await API.get("/user/all");
-      set({ users: data.users });
+      const filteredUsers = data.users.filter((user: UserType) => !user.isAI);
+      set({ users: filteredUsers });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to fetch users");
     } finally {

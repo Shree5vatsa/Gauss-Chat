@@ -8,7 +8,12 @@ export const findByIdUserService = async (userId: string) => {
 };
 
 export const getUserService = async (userId: string) => {
-  return await userModel.find({ _id: { $ne: userId } }).select("-password");
+  return await userModel
+    .find({
+      _id: { $ne: userId },
+      isAI: { $ne: true },
+    })
+    .select("-password");
 };
 
 export const updateUserProfileService = async (
