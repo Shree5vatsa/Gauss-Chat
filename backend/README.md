@@ -47,12 +47,53 @@ Each `src/` subfolder has its own `README.md` with file-by-file documentation, k
 
 ---
 
+## 📦 Dependencies
+
+### Production Dependencies
+
+| Package | Version | Purpose |
+|---|---|---|
+| `express` | ^5.1.0 | HTTP server framework (v5 handles async errors natively) |
+| `mongoose` | ^8.17.0 | MongoDB ODM — schema definitions, queries, validation |
+| `passport` | ^0.7.0 | Authentication middleware |
+| `passport-jwt` | ^4.0.1 | JWT strategy for Passport — reads token from cookie |
+| `jsonwebtoken` | ^9.0.2 | Signs and verifies JWTs |
+| `bcryptjs` | ^3.0.2 | Password hashing with salt rounds |
+| `cookie-parser` | ^1.4.7 | Parses `Cookie` header into `req.cookies` |
+| `cors` | ^2.8.5 | Cross-Origin Resource Sharing middleware |
+| `dotenv` | ^16.5.0 | Loads `.env` file into `process.env` |
+| `zod` | ^3.24.3 | Runtime schema validation for request bodies |
+| `socket.io` | ^4.8.1 | Real-time bidirectional WebSocket server |
+| `groq-sdk` | ^1.1.2 | Groq AI SDK for LLM-powered chat responses |
+| `cloudinary` | ^2.7.0 | Image upload and CDN storage |
+| `helmet` | ^8.1.0 | Secures HTTP headers |
+
+### Dev Dependencies
+
+| Package | Version | Purpose |
+|---|---|---|
+| `typescript` | ^5.8.3 | TypeScript compiler |
+| `ts-node` | ^10.9.2 | Run `.ts` files directly without compiling |
+| `nodemon` | ^3.1.11 | Hot reload — restarts server on file changes |
+| `@types/express` | ^5.0.3 | TypeScript types for Express |
+| `@types/node` | ^22.15.3 | TypeScript types for Node.js built-ins |
+| `@types/jsonwebtoken` | ^9.0.10 | TypeScript types for jsonwebtoken |
+| `@types/bcryptjs` | ^2.4.6 | TypeScript types for bcryptjs |
+| `@types/passport` | ^1.0.17 | TypeScript types for Passport |
+| `@types/passport-jwt` | ^4.0.1 | TypeScript types for passport-jwt |
+| `@types/cors` | ^2.8.17 | TypeScript types for cors |
+| `@types/cookie-parser` | ^1.4.8 | TypeScript types for cookie-parser |
+
+---
+
 ## 🚀 Getting Started
 
-### Install dependencies
+### Install all dependencies
 ```bash
 npm install
 ```
+
+This installs everything listed in `package.json` — both production and dev dependencies. You do **not** need to install TypeScript or nodemon globally.
 
 ### Set up environment variables
 Create a `.env` file in `backend/` (see `src/config/env.config.ts` for required keys):
