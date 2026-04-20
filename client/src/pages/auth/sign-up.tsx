@@ -33,12 +33,19 @@ const SignUp = () => {
     setBgImage(theme === "dark" ? bgImageDark : bgImageLight);
   }, [theme]);
 
-  const formSchema = z.object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email").min(1, "Email is required"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-  });
+  // ✅ Updated schema with confirm password
+  const formSchema = z
+    .object({
+      firstName: z.string().min(1, "First name is required"),
+      lastName: z.string().min(1, "Last name is required"),
+      email: z.string().email("Invalid email").min(1, "Email is required"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+      confirmPassword: z.string().min(6, "Please confirm your password"),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +54,7 @@ const SignUp = () => {
       lastName: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -55,8 +63,14 @@ const SignUp = () => {
   const lastName = watch("lastName");
   const email = watch("email");
   const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
   const isFormFilled =
-    firstName && lastName && email && password && !emailError;
+    firstName &&
+    lastName &&
+    email &&
+    password &&
+    confirmPassword &&
+    !emailError;
 
   const emailValue = form.watch("email");
 
@@ -200,6 +214,28 @@ const SignUp = () => {
                           <Input
                             type="password"
                             placeholder="Create a strong password"
+                            className="h-11 text-base"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Confirm Password Field */}
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">
+                          Confirm Password
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Confirm your password"
                             className="h-11 text-base"
                             {...field}
                           />
