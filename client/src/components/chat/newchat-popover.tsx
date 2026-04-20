@@ -106,11 +106,12 @@ export const NewChatPopover = memo(() => {
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 rounded-full hover:bg-primary/10 cursor-pointer transition-all duration-200 active:scale-95"
+          variant="outline"
+          size="default"
+          className="h-9 px-3 gap-1.5 rounded-full border-border hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200 active:scale-95"
         >
-          <UserPlus className="!h-5 !w-5 !stroke-1.5" />
+          <UserPlus className="!h-4 !w-4 !stroke-1.5" />
+          <span className="text-sm font-medium hidden sm:inline">New Chat</span>
         </Button>
       </PopoverTrigger>
 

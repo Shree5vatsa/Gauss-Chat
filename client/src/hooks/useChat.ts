@@ -55,7 +55,12 @@ export const useChat = create<ChatState>()((set, get) => ({
 
     try {
       const { data } = await API.get("/user/all");
-      const filteredUsers = data.users.filter((user: UserType) => !user.isAI);
+      const { user: currentUser } = useAuth.getState();
+
+      // Filter out AI users and the current user
+      const filteredUsers = data.users.filter(
+        (user: UserType) => !user.isAI && user._id !== currentUser?._id,
+      );
       set({ users: filteredUsers });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to fetch users");
