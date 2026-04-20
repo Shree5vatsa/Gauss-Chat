@@ -1,156 +1,218 @@
-# Gauss-Chat Backend
+# 📦 Gauss-Chat — Backend
 
-This is the backend service for the **Gauss-Chat** application. It provides a robust, real-time messaging API built with **Node.js, Express, TypeScript, Mongoose**, and **Socket.io**. It is designed with a layered architecture (Controllers, Services, Models, Routes) and uses modern practices such as JWT authentication with cookies, Zod for schema validation, and complete TypeScript typings.
-
----
-
-## 🚀 Features
-
-- **Real-time Communication:** Powered by `socket.io` for seamless, instant messaging. Notifications for online/offline status, new chat creation, and live message updates.
-- **Authentication & Authorization:** Secure user authentication using `passport-jwt`. Includes registration, login, logout, and session status endpoints. Tokens are securely handled via HTTP-only cookies.
-- **RESTful API:** Structured and predictable endpoints for Users, Chats, Auth, and Messages.
-- **Database & Models:** Utilizes MongoDB (via Mongoose) to manage `User`, `Chat`, and `Message` entities, handling both one-on-one and group chats.
-- **Media Management:** Pre-configured with Cloudinary for handling media uploads (like user avatars and message images).
-- **Validation:** Type-safe payload validation using `zod`.
-- **Security:** Standard protections using `helmet`, `cors`, and structured error handling.
-- **TypeScript:** Fully typed codebase ensuring safety and easier developer experience.
+The backend for **Gauss-Chat** — a full-stack real-time chat application with support for direct messaging, group chats, and an AI assistant powered by Groq. Built with **Node.js + Express + TypeScript**, backed by **MongoDB (Mongoose)**, and real-time communication handled via **Socket.io**.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-- **Core:** Node.js, Express.js
-- **Language:** TypeScript
-- **Database:** MongoDB, Mongoose
-- **WebSockets:** Socket.io
-- **Authentication:** Passport.js, JSON Web Tokens (JWT), bcryptjs
-- **Validation:** Zod
-- **Cloud Storage:** Cloudinary
-- **Security & Utils:** Cookie-Parser, CORS, Helmet, Dotenv
+| Technology | Role |
+|---|---|
+| **Express v5** | HTTP server framework |
+| **TypeScript** | Type safety across the entire backend |
+| **MongoDB + Mongoose** | Database and ODM |
+| **Passport.js + JWT** | Authentication via `httpOnly` cookies |
+| **Socket.io** | Real-time bidirectional communication |
+| **Zod** | Runtime request validation |
+| **Groq SDK** | AI responses (LLM inference) |
+| **Cloudinary** | Image upload and storage |
+| **bcryptjs** | Password hashing |
+| **dotenv** | Environment variable management |
+| **nodemon + ts-node** | Dev server with hot reload |
 
 ---
 
-## 📂 Project Structure
+## 🗂️ Folder Structure
 
-```text
+```
 backend/
 ├── src/
-│   ├── config/         # Environment, database, standard HTTP status, Passport, & Cloudinary configurations
-│   ├── controllers/    # Request handlers bridging routes to services
-│   ├── lib/            # External library instantiations (e.g., Socket.io `socket.ts`)
-│   ├── middlewares/    # Custom Express middlewares (asyncHandler, errorHandler)
-│   ├── models/         # Mongoose schemas (User, Chat, Message)
-│   ├── routes/         # Express route definitions (auth, chat, user)
-│   ├── services/       # Core business logic communicating with the database
-│   ├── utils/          # Helper utilities (e.g., bcrypt.ts for hashing)
-│   ├── validators/     # Zod schema definitions for request bodies
-│   └── index.ts        # Application entry point & Server initialization
-├── .env                # Environment variables (not committed)
-├── package.json        # Dependencies and scripts
-└── tsconfig.json       # TypeScript compiler configuration
+│   ├── index.ts            ← App entry point — creates server, registers middleware & routes
+│   ├── config/             ← Environment, DB, Passport, Cloudinary, HTTP status config
+│   ├── controllers/        ← HTTP request handlers (extract input → call service → respond)
+│   ├── services/           ← Business logic (DB queries, AI calls, data transformations)
+│   ├── models/             ← Mongoose schemas & models (User, Chat, Message)
+│   ├── routes/             ← Express routers — maps URLs to controllers
+│   ├── middlewares/        ← asyncHandler (error catching) + errorHandler (global error response)
+│   ├── validators/         ← Zod schemas for request body/param validation
+│   ├── lib/                ← Socket.io server setup and event handlers
+│   ├── utils/              ← Reusable helpers (AppError, bcrypt, cookie, getEnv)
+│   └── @types/             ← Custom TypeScript type augmentations (e.g., extends Express `Request`)
+├── nodemon.json            ← Dev server config (watches src/, runs ts-node)
+├── tsconfig.json           ← TypeScript compiler config
+└── package.json            ← Dependencies and npm scripts
 ```
+
+Each `src/` subfolder has its own `README.md` with file-by-file documentation, key patterns, and interview Q&A.
 
 ---
 
-## ⚙️ Environment Variables
+## 🚀 Getting Started
 
-To run this backend, you need an `.env` file in the root `backend` directory. Below is the required configuration format:
-
-```env
-# Application Setup
-PORT=8000
-NODE_ENV=development
-FRONTEND_ORIGIN=http://localhost:3000
-
-# Database
-MONGO_URI=your_mongodb_connection_string
-
-# Authentication
-JWT_SECRET=your_super_secret_jwt_key
-
-# Cloudinary (for Media Uploads)
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-```
-*(Make sure to match your frontend origin port and adjust paths as needed).*
-
----
-
-## 🏃‍♀️ Getting Started
-
-### 1. Prerequisites
-- Node.js (v18 or higher recommended)
-- MongoDB running locally or a MongoDB Atlas URI
-
-### 2. Installation
-Navigate to your `backend` directory and install the dependencies:
+### Install dependencies
 ```bash
-cd backend
 npm install
 ```
 
-### 3. Running the Server
+### Set up environment variables
+Create a `.env` file in `backend/` (see `src/config/env.config.ts` for required keys):
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=<your MongoDB connection string>
+JWT_SECRET=<your secret>
+JWT_EXPIRES_IN=7d
+FRONTEND_ORIGIN=http://localhost:5173
+CLOUDINARY_CLOUD_NAME=<your cloudinary name>
+CLOUDINARY_API_KEY=<your cloudinary api key>
+CLOUDINARY_API_SECRET=<your cloudinary api secret>
+GROQ_API_KEY=<your groq api key>
+```
 
-**Development Mode** (uses `nodemon` & `ts-node` for live reload):
+### Run development server
 ```bash
 npm run dev
 ```
+Uses **nodemon** + **ts-node** — watches `src/` for `.ts` changes and restarts automatically. No build step needed during development.
 
-**Production Build** (running compiled index):
-```bash
-npm start
+### Health check
+```
+GET /health → { "message": "Server is running", "status": "OK" }
 ```
 
 ---
 
-## 📡 API Endpoints Summary
+## ⚙️ `index.ts` — App Entry Point
 
-### Authentication (`/api/auth`)
-- `POST /register` - Register a new user
-- `POST /login` - Login to account & set JWT cookie
-- `POST /logout` - Clear session JWT cookie
-- `GET /status` - Check current auth status of user (Protected)
+This is where the entire application is assembled. Here's what happens on startup, in order:
 
-### User (`/api/user`)
-- `GET /all` - Fetch all users for starting chats (Protected)
+```ts
+const app = express();
+const server = http.createServer(app);  // wrap Express in native http.Server for Socket.io
+```
 
-### Chat (`/api/chat`)
-- `GET /all` - Fetch all chats belonging to the logged-in user (Protected)
-- `GET /:id` - Get details of a single chat (Protected)
-- `POST /create` - Create a new 1-on-1 or group chat (Protected)
-- `POST /message/send` - Send a message to a specific chat (Protected)
-- `POST /message/get` - Get messages for a specific chat (Protected)
-
----
-
-## 🔌 WebSockets (Socket.io)
-
-Real-time interactions are heavily utilized. The socket server listens for a JWT token mapped in the User's handshake headers.
-
-### Emitted Events (Backend to Client)
-- `online:users` - Broadcasts an array of online user IDs.
-- `chat:new` - Sent to specific users when they are added to a new chat.
-- `chat:update` - Updates a specific chat (like pushing the latest message).
-- `message:new` - Broadcasts into a chat-room when a new message is posted.
-
-### Listened Events (Client to Backend)
-- `chat:join` (chatId) - Subscribes the user to a specific chat room to listen for messages.
-- `chat:leave` (chatId) - Unsubscribes the user from the chat room.
+1. **Socket.io** is initialized on the `http.Server` (not directly on `app`) — required for WebSocket support
+2. **Body parsing** — `express.json({ limit: "10mb" })`, `cookieParser()`, `express.urlencoded()`
+3. **CORS** — configured with `credentials: true` and `FRONTEND_ORIGIN` whitelist
+4. **Passport** — `passport.initialize()` registers the JWT strategy
+5. **Health route** — `GET /health` for uptime checks
+6. **API router** — all routes mounted under `/api`
+7. **Error handler** — registered last (must be after all routes)
+8. **Server start** — on listen: connects to MongoDB, then ensures the AI user exists
 
 ---
 
-## 🔧 Postman / API Testing
+## 🔁 Request Lifecycle
 
-If testing with Postman or Requestly:
-1. Ensure your requests to protected routes pass cookies.
-2. Hit the login endpoint (`/api/auth/login`) first. Your testing client will store the resulting HTTP-only cookie automatically if cookie management is enabled.
-3. For WebSockets, configure your socket testing client to pass the cookie in headers or manually extract the session cookie to link.
+Every HTTP request through this backend follows this exact path:
+
+```
+HTTP Request
+     │
+     ▼
+[CORS + Body Parsing + Cookie Parser]   ← global Express middleware
+     │
+     ▼
+[passport.initialize()]                 ← makes req.user available pipeline-wide
+     │
+     ▼
+[router → /api/auth | /api/chat | /api/user]   ← routes/index.ts
+     │
+     ▼
+[passportAuthenticateJwt]               ← per-route or router-level auth guard
+     │                                    reads JWT cookie → fetches user → attaches req.user
+     ▼
+[asyncHandler(controller)]             ← wraps controller in try/catch
+     │
+     ▼
+[Controller]                           ← validates body (Zod), calls service, sends response
+     │
+     ▼
+[Service]                              ← business logic, DB queries, AI calls
+     │
+     ▼
+[Response]                             ← res.status().json()
+     │
+  (on error)
+     ▼
+[errorHandler middleware]              ← catches AppError → proper status, catches others → 500
+```
 
 ---
 
-## 🛡️ Best Practices Applied
-- **Fat Models, Skinny Controllers:** DB logic is mostly kept in services and models.
-- **Global Error Handling:** Wrapped inside `asyncHandler` logic preventing unhandled promise rejections.
-- **Pre Save Hooks:** Mongoose hooks are used extensively (e.g., automatically hashing passwords on save).
-- **Zod Pipelines:** Strictly enforcing DTO structures for robust runtime validation without crashing the server.
+## 🔌 Real-Time with Socket.io
+
+The HTTP server and Socket.io share the same port. Socket.io handles:
+- **Live message delivery** — messages pushed to recipient instantly without polling
+- **Online presence** — tracks connected users via a `userSocketMap`
+- **Unread count updates** — real-time badge increments for offline users
+- **AI thinking indicator** — server emits a "typing" event before the AI response arrives
+
+See `src/lib/README.md` for full Socket.io event documentation.
+
+---
+
+## 🔐 Authentication Flow
+
+1. User logs in → `loginService` verifies credentials
+2. On success: `setJwtAuthCookie()` signs a JWT and sets it as an `httpOnly` cookie (`accessToken`)
+3. On subsequent requests: `passportAuthenticateJwt` reads the cookie, verifies the JWT, fetches the user from DB, attaches to `req.user`
+4. On logout: `clearJwtAuthCookie()` instructs the browser to delete the cookie
+
+**Why `httpOnly` cookies instead of `localStorage`?**
+> `httpOnly` cookies can't be read by JavaScript — immune to XSS attacks. The browser sends them automatically on every request to the server.
+
+---
+
+## 🤖 AI Integration
+
+When a user creates an AI chat, a special AI user (`isAI: true`) is seeded into the DB by `ensureAIUserExists()` at server startup. When a message is sent to an AI chat:
+
+1. The user's message is saved to DB
+2. `sendMessageService` detects `isAiChat: true`
+3. Calls `aiService` which sends the message + conversation history to **Groq SDK**
+4. Groq returns a response — saved as a new Message from the AI user
+5. The AI reply is emitted to the frontend via Socket.io (not returned in the HTTP response)
+
+---
+
+## 📋 npm Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| `npm run dev` | `nodemon` | Dev server with hot reload (uses `nodemon.json`) |
+| `npm start` | `node src/index.ts` | Production start (requires build) |
+
+---
+
+## 🔑 Key Architecture Decisions (Interview-Ready)
+
+| Decision | Rationale |
+|---|---|
+| **`httpOnly` JWT cookie** | XSS-safe auth — JS can't steal the token |
+| **Zod for validation** | Single source of truth — runtime safety + TypeScript types via `z.infer<>` |
+| **`asyncHandler` wrapper** | Centralized error handling — no `try/catch` boilerplate in controllers |
+| **`AppError` subclasses** | Semantic, typed errors — `errorHandler` maps them to correct HTTP status codes |
+| **Service layer** | Controllers never touch the DB — services are reusable and independently testable |
+| **Socket.io on same port** | Simplifies deployment — one server handles both HTTP and WebSocket |
+| **AI user seeded on startup** | No manual DB seeding required — `ensureAIUserExists()` guarantees availability |
+| **`getEnv` fail-fast** | Crashes immediately if a required env var is missing — much easier to debug than runtime failures |
+
+---
+
+## 🧠 Interview Q&A (for revision only)
+
+**Q: Why use Express v5?**
+> Express v5 natively handles async errors by passing rejected promises to `next(error)` automatically. However, this project still uses `asyncHandler` for explicit clarity and backward compatibility habits.
+
+**Q: How does Passport JWT strategy work?**
+> It reads the `accessToken` cookie using `cookie-extractor`, verifies the signature with `JWT_SECRET`, decodes the `userId` payload, fetches the user from MongoDB, and attaches the user object to `req.user`. If the token is invalid or expired, it returns a 401.
+
+**Q: Why wrap Express in `http.createServer(app)`?**
+> `socket.io` needs to attach to a raw Node.js `http.Server` — not the Express `app` directly. Wrapping the app gives us a reference to the underlying server that Socket.io can bind its WebSocket upgrade handler to.
+
+**Q: What's the role of the service layer?**
+> Controllers handle HTTP (parse input, send response). Services handle business logic (DB queries, AI calls, data transformations). This separation means services can be called from multiple places (controllers, Socket.io handlers) without duplicating logic.
+
+**Q: How does the AI response avoid blocking the HTTP response?**
+> The controller returns `userMessage` immediately (HTTP response ends). Inside `sendMessageService`, the AI call to Groq runs asynchronously after the response is sent. The AI reply is then emitted via Socket.io — which is a separate channel from the HTTP request/response cycle.
