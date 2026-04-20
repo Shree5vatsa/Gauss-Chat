@@ -3,6 +3,7 @@ import { useSocket } from "@/hooks/useSocket";
 import type { MessageType } from "@/types/chat.types";
 import { useEffect, useRef } from "react";
 import ChatBodyMessage from "./chat-body-message";
+import AvatarWithBadge from "../avatarWithBadge";
 
 interface Props {
   chatId: string | null;
@@ -11,7 +12,38 @@ interface Props {
   isOtherUserTyping?: boolean;
   typingUserName?: string;
   isGroupChat?: boolean;
+  isAiChat?: boolean;
 }
+
+// Standalone AI thinking bubble — shown in the chat body while waiting for AI
+const AIThinkingBubble = () => (
+  <div className="flex gap-2 py-3 px-4 animate-in fade-in slide-in-from-bottom duration-300">
+    <div className="flex-shrink-0 flex items-start">
+      <AvatarWithBadge
+        name="Gauss AI Assistant"
+        src=""
+        isAI={true}
+        size="w-8 h-8"
+      />
+    </div>
+    <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-2 border-purple-500/30 rounded-bl-xl rounded-r-xl px-4 py-3">
+      <div className="flex items-center gap-1.5">
+        <div
+          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+          style={{ animationDelay: "0ms" }}
+        />
+        <div
+          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+          style={{ animationDelay: "150ms" }}
+        />
+        <div
+          className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+          style={{ animationDelay: "300ms" }}
+        />
+      </div>
+    </div>
+  </div>
+);
 
 const ChatBody = ({
   chatId,
@@ -20,9 +52,10 @@ const ChatBody = ({
   isOtherUserTyping = false,
   typingUserName = "",
   isGroupChat = false,
+  isAiChat = false,
 }: Props) => {
   const { socket } = useSocket();
-  const { addNewMessage } = useChat();
+  const { addNewMessage, isSendingMsg } = useChat();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const typingRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,6 +77,16 @@ const ChatBody = ({
       });
     }
   }, [isOtherUserTyping]);
+
+  // Auto-scroll when AI thinking bubble appears
+  useEffect(() => {
+    if (isSendingMsg) {
+      messagesEndRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [isSendingMsg]);
 
   // Listen for real-time new messages
   useEffect(() => {
@@ -105,6 +148,9 @@ const ChatBody = ({
             onReply={onReply}
           />
         ))}
+
+        {/* AI Thinking Bubble - shown while waiting for AI response */}
+        {isAiChat && isSendingMsg && <AIThinkingBubble />}
 
         {/* Typing Indicator - shown at bottom of messages */}
         {typingText && (

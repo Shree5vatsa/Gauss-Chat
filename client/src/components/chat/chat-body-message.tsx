@@ -66,10 +66,10 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
         : "bg-muted-foreground/10 border-l-primary",
   );
 
+
   return (
     <>
       <div className={containerClass}>
-        {/* Avatar - Only for other users */}
         {!isCurrentUser && (
           <div className="flex-shrink-0 flex items-start">
             <AvatarWithBadge
@@ -88,9 +88,7 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
               isCurrentUser && "flex-row-reverse",
             )}
           >
-            {/* Message Bubble */}
             <div className={messageClass}>
-              {/* Header: Name + Time + AI Badge */}
               <div className="flex items-center gap-2 mb-0.5 pb-1">
                 <span className="text-xs font-semibold flex items-center gap-1">
                   {isAIMessage && <Bot className="w-3 h-3 text-purple-500" />}
@@ -101,7 +99,6 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
                 </span>
               </div>
 
-              {/* Reply To Box */}
               {message.replyTo && (
                 <div className={replyBoxClass}>
                   <h5 className="font-medium text-xs">{replySenderName}</h5>
@@ -112,7 +109,6 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
                 </div>
               )}
 
-              {/* Image - Clickable */}
               {message?.image && (
                 <div className="relative group/image mt-1">
                   <img
@@ -131,31 +127,16 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
                 </div>
               )}
 
-              {/* Text Content */}
               {message.content && <p className="mt-0.5">{message.content}</p>}
 
-              {/* AI Thinking Spinner - Replaced bouncing dots */}
-              {isAIMessage && message.streaming && (
+              {/* Show spinner while streaming but has partial content */}
+              {isAIMessage && message.streaming && message.content && (
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-xs text-purple-500/70">
-                    AI is thinking...
-                  </span>
-                </div>
-              )}
-
-              {/* If no content and streaming, show just spinner */}
-              {isAIMessage && message.streaming && !message.content && (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-xs text-purple-500/70">
-                    Generating response...
-                  </span>
+                  <div className="w-3 h-3 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </div>
 
-            {/* Reply Button (on hover) */}
             <Button
               variant="ghost"
               size="icon"
@@ -172,7 +153,6 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
             </Button>
           </div>
 
-          {/* Message Status - Only for user messages */}
           {message.status && !isAIMessage && (
             <span className="block text-[10px] text-muted-foreground mt-0.5">
               {message.status}
@@ -181,7 +161,6 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
         </div>
       </div>
 
-      {/* Image Preview Modal */}
       <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
         <DialogContent
           className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent shadow-none border-none"

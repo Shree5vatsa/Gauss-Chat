@@ -119,6 +119,7 @@ const SingleChat = () => {
         isOtherUserTyping={isOtherUserTyping}
         typingUserName={typingUserName}
         isGroupChat={isGroupChat}
+        isAiChat={singleChat.chat.isAiChat}
       />
 
       <ChatFooter
