@@ -119,6 +119,7 @@ export const useChat = create<ChatState>()((set, get) => ({
 
     const tempUserId = generateUUID();
 
+    //Create temp message with "sent" status
     const tempMessage = {
       _id: tempUserId,
       chatId,
@@ -128,7 +129,7 @@ export const useChat = create<ChatState>()((set, get) => ({
       replyTo: replyTo || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: "sending...",
+      status: "sent",
     };
 
     // Add temp message
@@ -151,7 +152,7 @@ export const useChat = create<ChatState>()((set, get) => ({
       });
       const { userMessage } = data;
 
-      // UPDATE the temp message
+      // Update the temp message with real data (keep status as sent)
       set((state) => {
         if (!state.singleChat) return state;
 
@@ -162,7 +163,6 @@ export const useChat = create<ChatState>()((set, get) => ({
               msg._id === tempUserId
                 ? {
                     ...userMessage,
-                    status: "sent",
                     _id: tempUserId,
                   }
                 : msg,
@@ -228,11 +228,6 @@ export const useChat = create<ChatState>()((set, get) => ({
     });
   },
 
-  // Adds an incoming real-time message to the chat body (singleChat.messages).
-  // Unread count is intentionally NOT incremented here — ChatBody is only
-  // mounted when the user is actively viewing that chat, so the message is
-  // being read in real time. Unread counting is handled exclusively in
-  // handleChatUpdate (chat-list.tsx) which has the isViewingThisChat guard.
   addNewMessage: (chatId: string, message: MessageType) => {
     const chat = get().singleChat;
 
@@ -270,9 +265,7 @@ export const useChat = create<ChatState>()((set, get) => ({
   removeChatsWithParticipant: (userId: string) => {
     set((state) => ({
       chats: state.chats.filter((chat) => {
-        // Check if the deleted user is a participant
         const isParticipant = chat.participants.some((p) => p._id === userId);
-        // Keep chats where the deleted user is NOT a participant
         return !isParticipant;
       }),
     }));

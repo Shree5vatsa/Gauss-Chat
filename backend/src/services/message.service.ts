@@ -68,7 +68,7 @@ export const sendMessageService = async (
 
   chat.lastMessage = newMessage._id as mongoose.Types.ObjectId;
 
-  // ✅ INCREMENT UNREAD COUNT FOR ALL PARTICIPANTS EXCEPT SENDER
+  // INCREMENT UNREAD COUNT FOR ALL PARTICIPANTS EXCEPT SENDER
   const participants = chat.participants.map((p) => p.toString());
   for (const participantId of participants) {
     if (participantId !== userId) {

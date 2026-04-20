@@ -134,21 +134,23 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
               {/* Text Content */}
               {message.content && <p className="mt-0.5">{message.content}</p>}
 
-              {/* AI Thinking Animation */}
+              {/* AI Thinking Spinner - Replaced bouncing dots */}
               {isAIMessage && message.streaming && (
-                <div className="flex gap-1 mt-2">
-                  <span
-                    className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  />
-                  <span
-                    className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <span
-                    className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs text-purple-500/70">
+                    AI is thinking...
+                  </span>
+                </div>
+              )}
+
+              {/* If no content and streaming, show just spinner */}
+              {isAIMessage && message.streaming && !message.content && (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-xs text-purple-500/70">
+                    Generating response...
+                  </span>
                 </div>
               )}
             </div>
@@ -170,7 +172,7 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
             </Button>
           </div>
 
-          {/* Message Status */}
+          {/* Message Status - Only for user messages */}
           {message.status && !isAIMessage && (
             <span className="block text-[10px] text-muted-foreground mt-0.5">
               {message.status}
