@@ -1,270 +1,144 @@
-# 🎮 Controllers
+# 📁 controllers/
 
-Controllers are the **request handlers** that sit between the routes and the service layer. Each controller:
+Controllers are the **entry point for every HTTP request**. They sit between the routes and services — they don't contain business logic, they just:
+1. Extract & validate input (from `req.body`, `req.params`, `req.user`)
+2. Call the appropriate service
+3. Send back a response
 
-- Receives an HTTP request
-- Validates/parses the request body or params using **Zod schemas**
-- Delegates business logic to the corresponding **service**
-- Returns a structured JSON response
-
-All controllers are wrapped with `asyncHandler` to automatically catch and forward async errors to the global error handler — no manual `try/catch` needed.
+All controllers are wrapped in `asyncHandler` to avoid repetitive try/catch blocks.
 
 ---
 
-## 📁 Files Overview
+## 📄 auth.controller.ts
 
-| File | Domain | Exported Controllers |
-|---|---|---|
-| [`auth.controller.ts`](#-authcontrollerts) | Authentication | `registerController`, `loginController`, `logoutController`, `authStatusController` |
-| [`chats.controller.ts`](#-chatscontrollerts) | Chats | `createChatController`, `getUserChatController`, `getSingleChatController` |
-| [`message.controller.ts`](#-messagecontrollerts) | Messages | `sendMessageController` |
-| [`user.controller.ts`](#-usercontrollerts) | Users | `getUserController` |
+Handles all authentication-related HTTP operations.
+
+### `registerController` — `POST /auth/register`
+- Parses and validates `req.body` using `registerSchema` (Zod)
+- Calls `registerService()` to create the user in DB
+- Sets a JWT cookie via `setJwtAuthCookie()`
+- Returns `201 CREATED` with the new user object
+
+### `loginController` — `POST /auth/login`
+- Validates body with `loginSchema`
+- Calls `loginService()` to verify credentials
+- Sets JWT cookie on success
+- Returns `200 OK` with user data
+
+### `logoutController` — `POST /auth/logout`
+- Calls `clearJwtAuthCookie()` to remove the auth cookie
+- Returns `200 OK`
+
+### `authStatusController` — `GET /auth/status`
+- Reads `req.user` (populated by Passport middleware upstream)
+- Returns the currently logged-in user
+- Used for session persistence on page reload
+
+### `changePasswordController` — `PATCH /auth/change-password`
+- Validates `newPassword` from body using `changePasswordSchema`
+- Reads `userId` from `req.user` (auth required)
+- Throws `UnauthorizedException` if user is not authenticated
+- Calls `changePasswordService(userId, newPassword)`
+- Returns `200 OK`
 
 ---
 
-## 📄 `auth.controller.ts`
+## 📄 chats.controller.ts
 
-Handles authentication-related HTTP requests. Relies on `auth.service.ts` for business logic and `cookie.ts` utilities to set/clear the JWT access token as an HTTP-only cookie.
+Handles chat room creation, retrieval, and unread message tracking.
+
+### `createChatController` — `POST /chats`
+- Reads `userId` from `req.user`
+- Validates body with `createChatSchema`
+- Calls `createChatService(userId, body)` — handles both direct and AI chats
+- Returns `201 CREATED` with the new chat object
+
+### `getUserChatController` — `GET /chats`
+- Fetches all chats belonging to the logged-in user
+- Calls `getUserChatService(userId)`
+- Returns `200 OK` with array of chats
+
+### `getSingleChatController` — `GET /chats/:id`
+- Validates `:id` param with `chatIdSchema`
+- Calls `getSingleChatService(id, userId)`
+- Returns both the **chat metadata** and its **messages** in one response
+- Used when a user opens a chat window
+
+### `resetUnreadCountController` — `PATCH /chats/:id/read`
+- Triggered when a user opens a chat
+- Calls `resetUnreadCountService(id, userId)` to zero out the unread badge
+- Returns `200 OK`
+
+### `ensureAIUserExists()` — utility (not a route)
+- Called on server startup
+- Checks if an AI user (`isAI: true`) exists in DB
+- If not, creates one with email `ai@gauss-chat.com` and a random hashed password
+- Ensures the AI assistant is always available without manual seeding
 
 ---
 
-### `registerController`
+## 📄 message.controller.ts
 
-Registers a new user and sets the JWT access cookie on success.
+Handles sending messages (both user-to-user and AI responses).
 
-| Detail | Value |
+### `sendMessageController` — `POST /messages`
+- Reads `userId` from `req.user`
+- Validates body with `sendMessageSchema`
+- Calls `sendMessageService(userId, body)` which handles:
+  - Saving the user's message
+  - Triggering AI reply if it's an AI chat (handled inside the service)
+- Returns `200 OK` with the sent `userMessage`
+
+> ⚠️ Note: AI response is handled inside `sendMessageService`, not here. The controller only gets back the user's own message.
+
+---
+
+## 📄 user.controller.ts
+
+Handles user profile operations.
+
+### `getUserController` — `GET /users/:id`
+- Reads `userId` from `req.params.id`
+- Calls `getUserService(userId)` — likely used for searching/viewing other profiles
+- Returns `200 OK` with user data
+
+### `updateProfileController` — `PATCH /users/profile`
+- Reads `name` and `avatar` from `req.body`
+- Calls `updateUserProfileService(userId, { name, avatar })`
+- Returns `200 OK` with the updated user object
+- `avatar` is likely a Cloudinary URL (handled in the service layer)
+
+### `deleteAccountController` — `DELETE /users/account`
+- Calls `deleteUserAccountService(userId)`
+- Returns `200 OK` on success
+
+---
+
+## 🔑 Key Patterns (Interview-Ready)
+
+| Pattern | What it does |
 |---|---|
-| Method | `POST` |
-| Validator | `registerSchema` |
-| Service | `registerService` |
-| Sets Cookie | ✅ `accessToken` |
-| Success Status | `201 Created` |
-
-**Response:**
-```json
-{
-  "message": "User created and login successfully",
-  "user": { ... }
-}
-```
+| `asyncHandler(fn)` | Wraps async controllers — catches errors and forwards to Express error middleware automatically |
+| `req.user` | Populated by Passport.js JWT strategy before the controller runs |
+| Zod `.parse()` | Throws a validation error automatically if body doesn't match schema — no manual `if` checks needed |
+| `UnauthorizedException` | Custom error class — gets caught by `errorHandler.middleware` and returns a proper 401 response |
+| Service layer calls | Controllers never touch the DB directly — all logic lives in `services/` |
 
 ---
 
-### `loginController`
+## 🧠 Interview Q&A (for revision only)
 
-Authenticates an existing user and sets the JWT access cookie.
+**Q: Why separate controllers from services?**
+> Controllers handle HTTP concerns (req/res). Services handle business logic. This makes services reusable and independently testable.
 
-| Detail | Value |
-|---|---|
-| Method | `POST` |
-| Validator | `loginSchema` |
-| Service | `loginService` |
-| Sets Cookie | ✅ `accessToken` |
-| Success Status | `200 OK` |
+**Q: What does `asyncHandler` do?**
+> It wraps an async function so any thrown error is automatically passed to `next(err)` — eliminating the need for try/catch in every controller.
 
-**Response:**
-```json
-{
-  "message": "User logged in successfully",
-  "user": { ... }
-}
-```
+**Q: How is the user available on `req.user`?**
+> Passport.js JWT middleware runs before protected routes. It decodes the JWT from the cookie, fetches the user from DB, and attaches it to `req.user`.
 
----
+**Q: How does Zod validation work here?**
+> `schema.parse(req.body)` throws a `ZodError` if validation fails. `asyncHandler` catches it and the error middleware converts it to a `400` response.
 
-### `logoutController`
-
-Clears the JWT access cookie, effectively logging out the user.
-
-| Detail | Value |
-|---|---|
-| Method | `POST` |
-| Auth Required | ✅ |
-| Clears Cookie | ✅ `accessToken` |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "User logged out successfully"
-}
-```
-
----
-
-### `authStatusController`
-
-Returns the currently authenticated user's data. Used by the frontend to verify session validity on app load.
-
-| Detail | Value |
-|---|---|
-| Method | `GET` |
-| Auth Required | ✅ (via `passportAuthenticateJwt`) |
-| Source | `req.user` (populated by Passport) |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "User fetched successfully",
-  "user": { ... }
-}
-```
-
----
-
-## 📄 `chats.controller.ts`
-
-Handles chat-related HTTP requests. Requires authentication on all routes — throws `UnauthorizedException` if `req.user` is missing.
-
----
-
-### `createChatController`
-
-Creates a new chat between the authenticated user and the specified participants.
-
-| Detail | Value |
-|---|---|
-| Method | `POST` |
-| Auth Required | ✅ |
-| Validator | `createChatSchema` |
-| Service | `createChatService` |
-| Success Status | `201 Created` |
-
-**Response:**
-```json
-{
-  "message": "Chat created successfully",
-  "chat": { ... }
-}
-```
-
----
-
-### `getUserChatController`
-
-Fetches all chats that the authenticated user is a participant in.
-
-| Detail | Value |
-|---|---|
-| Method | `GET` |
-| Auth Required | ✅ |
-| Service | `getUserChatService` |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "User Chats fetched successfully",
-  "chats": [ ... ]
-}
-```
-
----
-
-### `getSingleChatController`
-
-Fetches a single chat by ID along with its messages. Validates the chat ID via `chatIdSchema`.
-
-| Detail | Value |
-|---|---|
-| Method | `GET` |
-| Auth Required | ✅ |
-| Param | `:id` (chat ID, validated via `chatIdSchema`) |
-| Service | `getSingleChatService` |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "Chat fetched successfully",
-  "chat": { ... },
-  "messages": [ ... ]
-}
-```
-
----
-
-## 📄 `message.controller.ts`
-
-Handles sending messages within a chat.
-
----
-
-### `sendMessageController`
-
-Sends a message from the authenticated user to a specific chat. Delegates to `sendMessageService` which handles persistence and real-time socket emission.
-
-| Detail | Value |
-|---|---|
-| Method | `POST` |
-| Auth Required | ✅ |
-| Validator | `sendMessageSchema` |
-| Service | `sendMessageService` |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "Message sent successfully",
-  "...result": "/* spread of service return */"
-}
-```
-
----
-
-## 📄 `user.controller.ts`
-
-Handles user-related HTTP requests. Currently exposes a single endpoint for searching/fetching users.
-
----
-
-### `getUserController`
-
-Fetches a list of users, optionally filtered by the given user ID from route params (used for search/suggestion features).
-
-| Detail | Value |
-|---|---|
-| Method | `GET` |
-| Param | `:id` (authenticated user's ID, used to exclude self from results) |
-| Service | `getUserService` |
-| Success Status | `200 OK` |
-
-**Response:**
-```json
-{
-  "message": "Users fetched successfully",
-  "users": [ ... ]
-}
-```
-
----
-
-## 🔗 Controller → Service Map
-
-```
-auth.controller.ts
-    ├── registerController   → registerService
-    ├── loginController      → loginService
-    ├── logoutController     → (cookie utility only)
-    └── authStatusController → (req.user from Passport)
-
-chats.controller.ts
-    ├── createChatController    → createChatService
-    ├── getUserChatController   → getUserChatService
-    └── getSingleChatController → getSingleChatService
-
-message.controller.ts
-    └── sendMessageController → sendMessageService
-
-user.controller.ts
-    └── getUserController → getUserService
-```
-
----
-
-## 🛡️ Common Patterns
-
-- **`asyncHandler`** — Wraps every controller to propagate async errors to the global error middleware automatically.
-- **Zod Validation** — Input from `req.body` or `req.params` is always parsed with a Zod schema before use. Invalid input throws a parse error caught by `asyncHandler`.
-- **Auth Guard** — Protected controllers check `req.user` (populated by `passportAuthenticateJwt`) and throw `UnauthorizedException` if the user is absent.
+**Q: Why does `sendMessageController` only return `userMessage` and not the AI reply?**
+> The AI response is generated asynchronously inside the service and emitted via Socket.io — it doesn't block the HTTP response.

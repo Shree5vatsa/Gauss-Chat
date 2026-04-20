@@ -18,7 +18,7 @@ export const useResizablePanel = ({
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
 
-  // Load saved width (respect current maxWidth)
+  // Load saved width 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
@@ -41,11 +41,11 @@ export const useResizablePanel = ({
 const handleMouseMove = useCallback(
   (e: MouseEvent) => {
     if (!isResizing) return;
-    console.log("Mouse moving, isResizing:", isResizing); // ← Add this
+    console.log("Mouse moving, isResizing:", isResizing);
     const delta = e.clientX - startXRef.current;
     let newWidth = startWidthRef.current + delta;
     newWidth = Math.min(maxWidth, Math.max(minWidth, newWidth));
-    console.log("New width:", newWidth); // ← Add this
+    console.log("New width:", newWidth);
     setWidth(newWidth);
   },
   [isResizing, minWidth, maxWidth],

@@ -18,14 +18,14 @@ export const useSocket = create<SocketState>()((set, get) => ({
 
   connectSocket: () => {
     const { socket } = get();
-    console.log("🔵 connectSocket called, current socket:", socket?.connected);
+    console.log("connectSocket called, current socket:", socket?.connected);
 
     if (socket?.connected) {
-      console.log("🔵 Socket already connected, skipping");
+      console.log("Socket already connected, skipping");
       return;
     }
 
-    console.log("🔵 Creating new socket connection to:", BASE_URL);
+    console.log("Creating new socket connection to:", BASE_URL);
     const newSocket = io(BASE_URL, {
       withCredentials: true,
       autoConnect: true,
@@ -34,37 +34,32 @@ export const useSocket = create<SocketState>()((set, get) => ({
     set({ socket: newSocket });
 
     newSocket.on("connect", () => {
-      console.log("🟢 Socket connected successfully!", newSocket.id);
+      console.log("Socket connected successfully!", newSocket.id);
     });
 
     newSocket.on("connect_error", (err) => {
-      console.error("🔴 Socket connection error:", err.message);
+      console.error("Socket connection error:", err.message);
     });
 
     newSocket.on("online:users", (userIds) => {
       
-
-      // ✅ Filter out AI users from online list
-      // We need to know which users are AI - for now, we'll let the backend handle it
-      // But for frontend, we can't filter without knowing AI users
-      // Better to filter on backend, but as a fallback:
-      console.log("🟡 Online users received:", userIds);
+      console.log("Online users received:", userIds);
       set({ onlineUsers: userIds });
     });
 
     newSocket.on("disconnect", (reason) => {
-      console.log("🔴 Socket disconnected:", reason);
+      console.log("Socket disconnected:", reason);
       set({ onlineUsers: [] });
     });
   },
 
   disconnectSocket: () => {
     const { socket } = get();
-    console.log("🔵 disconnectSocket called");
+    console.log("disconnectSocket called");
     if (socket) {
       socket.disconnect();
       set({ socket: null, onlineUsers: [] });
-      console.log("🔵 Socket disconnected");
+      console.log("Socket disconnected");
     }
   },
 }));

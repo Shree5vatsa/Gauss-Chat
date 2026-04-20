@@ -17,7 +17,7 @@ interface Props {
 const ChatHeader = ({ chat, currentUserId }: Props) => {
   const navigate = useNavigate();
 
-  // ✅ Get all data from helper (includes AI detection)
+  // Get all data from helper
   const { name, subheading, avatar, isOnline, isGroup, isAI } =
     getOtherUserAndGroup(chat, currentUserId);
 
@@ -58,7 +58,6 @@ const ChatHeader = ({ chat, currentUserId }: Props) => {
 
           <div>
             <h5 className="font-semibold text-base line-clamp-1">{name}</h5>
-            {/* ✅ Use subheading directly - it already returns "AI Assistant" for AI */}
             <p className="text-xs text-muted-foreground">{subheading}</p>
           </div>
         </div>

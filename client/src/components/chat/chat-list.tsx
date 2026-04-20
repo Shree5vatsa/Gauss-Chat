@@ -119,14 +119,12 @@ const ChatList = ({ onChatSelect }: ChatListProps) => {
     };
   }, [socket, updateChatLastMessage]);
 
-  // ✅ Handle account deletion - remove chats with deleted user
+  //Handle account deletion - remove chats with deleted user
   useEffect(() => {
     if (!socket) return;
 
     const handleAccountDeleted = (data: { deletedUserId: string }) => {
-      console.log("🔴 User account deleted:", data.deletedUserId);
       removeChatsWithParticipant(data.deletedUserId);
-      // Refetch to ensure consistency
       fetchChats();
     };
 

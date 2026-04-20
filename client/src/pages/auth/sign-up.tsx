@@ -33,7 +33,6 @@ const SignUp = () => {
     setBgImage(theme === "dark" ? bgImageDark : bgImageLight);
   }, [theme]);
 
-  // ✅ Updated schema with confirm password
   const formSchema = z
     .object({
       firstName: z.string().min(1, "First name is required"),

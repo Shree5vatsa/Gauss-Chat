@@ -20,9 +20,9 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
     currentUserId,
   );
 
-  // ✅ Check if this is an AI chat
+  // Check if it's AI chat
   const isAIChat = chat.isAiChat;
-  const isAI = isAIChat; // For AI chat, show AI avatar
+  const isAI = isAIChat; 
 
   const getLastMessageText = () => {
     if (!lastMessage) {
@@ -64,7 +64,7 @@ const ChatListItem = ({ chat, currentUserId, onClick }: PropsType) => {
         src={avatar}
         isGroup={isGroup}
         isOnline={isOnline}
-        isAI={isAI} // ✅ Pass isAI flag
+        isAI={isAI} 
       />
 
       <div className="flex-1 min-w-0">

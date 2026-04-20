@@ -29,7 +29,7 @@ export const createChatService = async (
   let chat;
   let allParticipantIds: string[] = [];
 
-  // ✅ HANDLE AI CHAT (1-on-1 with AI)
+  //HANDLE AI CHAT (1-on-1 with AI)
   if (isAiChat) {
     // Check if AI user exists, if not create it
     let aiUser = await userModel.findOne({ isAI: true });
@@ -61,7 +61,7 @@ export const createChatService = async (
       createdBy: userId,
     });
   }
-  // ✅ EXISTING GROUP CHAT LOGIC
+  //EXISTING GROUP CHAT LOGIC
   else if (isGroup && participants?.length && groupName) {
     allParticipantIds = [userId, ...participants];
 
@@ -74,7 +74,7 @@ export const createChatService = async (
       groupAvatar,
     });
   }
-  // ✅ EXISTING 1-on-1 CHAT LOGIC
+  //EXISTING 1-on-1 CHAT LOGIC
   else if (participantId && !isAiChat) {
     const otherUser = await userModel.findById(participantId);
     if (!otherUser) {

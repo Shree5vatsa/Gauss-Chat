@@ -281,12 +281,9 @@ export const NewChatPopover = memo(() => {
 
 NewChatPopover.displayName = "NewChatPopover";
 
-// ============================================
-// Sub-components
-// ============================================
 
 const UserAvatar = memo(({ user }: { user: UserType }) => {
-  // Check if this is the AI user (by email or name)
+  // Check if AI profile
   const isAIUser =
     user.email === "ai@gauss-chat.com" || user.name === "Gauss AI Assistant";
 

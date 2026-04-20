@@ -95,7 +95,7 @@ const ChatBody = ({
 
     const handleNewMessage = (msg: MessageType) => {
       console.log(
-        "🟢 ChatBody received message:",
+        " ChatBody received message:",
         msg._id,
         "Content:",
         msg.content,
@@ -103,7 +103,7 @@ const ChatBody = ({
 
       // Only add message if it belongs to current chat
       if (msg.chatId === chatId) {
-        console.log("✅ Adding message to current chat");
+        console.log("Adding message to current chat");
         addNewMessage(chatId, msg);
       }
     };

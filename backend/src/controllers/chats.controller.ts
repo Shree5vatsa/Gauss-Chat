@@ -59,7 +59,7 @@ export const getSingleChatController = asyncHandler(
   },
 );
 
-// ✅ NEW: Reset unread count when user opens a chat
+// Reset unread count when user opens a chat
 export const resetUnreadCountController = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user?._id?.toString();

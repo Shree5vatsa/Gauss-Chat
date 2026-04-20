@@ -85,7 +85,7 @@ export const sendMessageService = async (
   const allParticipantIds = chat.participants.map((id) => id.toString());
   emitLastMessageToParticipants(allParticipantIds, chatId, newMessage);
 
-  // ✅ HANDLE AI RESPONSE
+  //HANDLE AI RESPONSE
   if (chat.isAiChat) {
     // Get the AI participant (the bot)
     const aiParticipant = await userModel.findOne({ isAI: true });
@@ -137,10 +137,6 @@ export const sendMessageService = async (
 
       // Update lastMessage in chat
       chat.lastMessage = aiMessage._id as mongoose.Types.ObjectId;
-
-      // ✅ FIXED: DO NOT increment unread count for AI responses
-      // The user is actively in the chat, so AI messages should be marked as read immediately
-      // No unread increment needed for the user
 
       await chat.save();
 

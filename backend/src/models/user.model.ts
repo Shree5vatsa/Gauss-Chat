@@ -7,7 +7,7 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   avatar?: string | null;
-  isAI?: boolean; // ✅ ADD THIS
+  isAI?: boolean;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;

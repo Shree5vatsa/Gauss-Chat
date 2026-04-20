@@ -44,9 +44,6 @@ export const getOtherUserAndGroup = (
 
   const other = chat?.participants.find((p) => p._id !== currentUserId);
 
-  // Use chat.isAiChat as the primary source of truth for AI detection.
-  // Falling back to other?.isAI handles edge cases, but chat.isAiChat is
-  // always present regardless of which fields were selected in the populate.
   const isAI = chat.isAiChat === true || other?.isAI === true;
 
   const displayName = isAI ? "Gauss AI Assistant" : other?.name || "Unknown";
@@ -60,7 +57,7 @@ export const getOtherUserAndGroup = (
     subheading: isAI ? "AI Assistant" : isOnline ? "Online" : "Offline",
     avatar: avatar,
     isGroup: false,
-    isOnline: isOnline, // was hardcoded false — now correct for both AI and regular users
+    isOnline: isOnline, 
     isAI: isAI,
   };
 };

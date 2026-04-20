@@ -3,7 +3,7 @@ import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { registerService, loginService } from "../services/auth.service";
 import { clearJwtAuthCookie, setJwtAuthCookie } from "../utils/cookie";
 import { loginSchema, registerSchema } from "../validators/auth.validator";
-import { Request, Response } from "express"; // Import both from express
+import { Request, Response } from "express"; 
 import { changePasswordService } from "../services/auth.service";
 import { changePasswordSchema } from "../validators/auth.validator";
 import { UnauthorizedException } from "../utils/app-Error";

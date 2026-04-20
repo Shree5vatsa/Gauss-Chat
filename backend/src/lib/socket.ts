@@ -3,7 +3,7 @@ import { Server as SocketServer, Socket } from "socket.io";
 import { Env } from "../config/env.config";
 import jwt from "jsonwebtoken";
 import { validateChatParticipant } from "../services/chat.service";
-import ChatModel from "../models/chat.model"; // ✅ ADD THIS
+import ChatModel from "../models/chat.model";
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -53,7 +53,7 @@ export const initializeSocket = (httpServer: HTTPServer) => {
     io?.emit("online:users", Array.from(onlineUsers.keys()));
     socket.join(`user:${userId}`);
 
-    // ✅ JOIN ALL CHAT ROOMS FOR THIS USER ON CONNECTION
+    //JOIN ALL CHAT ROOMS FOR THIS USER ON CONNECTION
     try {
       const userChats = await ChatModel.find({
         participants: { $in: [userId] },

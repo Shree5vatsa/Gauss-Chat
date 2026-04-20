@@ -7,9 +7,7 @@ import {
 import { NewChatPopover } from "./newchat-popover";
 import { cn } from "@/lib/utils";
 
-// ============================================
-// Filter Chip Component (Modular, self-contained)
-// ============================================
+// Filter Chip Component
 interface FilterChipProps {
   active: boolean;
   onClick: () => void;
@@ -47,15 +45,11 @@ const FilterChip = ({ active, onClick, children, count }: FilterChipProps) => {
   );
 };
 
-// ============================================
 // Main ChatListHeader Component
-// ============================================
 interface ChatListHeaderProps {
   onSearch: (val: string) => void;
-  // Filter props
   filterType: "all" | "individuals" | "groups" | "unread";
   onFilterChange: (filter: "all" | "individuals" | "groups" | "unread") => void;
-  // Count props for badges
   totalCount: number;
   individualsCount: number;
   groupsCount: number;

@@ -66,7 +66,6 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
         : "bg-muted-foreground/10 border-l-primary",
   );
 
-
   return (
     <>
       <div className={containerClass}>
@@ -127,7 +126,12 @@ const ChatMessageBody = memo(({ message, onReply }: Props) => {
                 </div>
               )}
 
-              {message.content && <p className="mt-0.5">{message.content}</p>}
+              {/* Text Content with proper line breaks and spacing */}
+              {message.content && (
+                <p className="mt-0.5 whitespace-pre-line leading-relaxed">
+                  {message.content}
+                </p>
+              )}
 
               {/* Show spinner while streaming but has partial content */}
               {isAIMessage && message.streaming && message.content && (

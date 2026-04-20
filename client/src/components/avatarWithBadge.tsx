@@ -30,14 +30,8 @@ const AvatarWithBadge = ({
   return (
     <div className="relative shrink-0">
       <Avatar className={size}>
-        {/*
-         * key={avatar} forces Radix UI to remount AvatarImage whenever the
-         * src changes. Without this, Radix's internal loading state machine
-         * can get stuck in "error" when src starts as "" and then updates,
-         * causing the fallback to display instead of the image.
-         */}
         <AvatarImage key={avatar} src={avatar} className="object-cover" />
-        {/* ✅ Only show fallback for non-AI users */}
+        {/* Only show fallback for non-AI users */}
         {!isAI && (
           <AvatarFallback
             className={cn(

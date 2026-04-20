@@ -17,8 +17,6 @@ interface AuthState {
   isAuthStatus: () => void;
 }
 
-//without persist
-
 export const useAuth = create<AuthState>()((set) => ({
   user: null,
   isSigningUp: false,

@@ -98,7 +98,7 @@ const ChatFooter = ({
       replyTo: replyTo,
     };
 
-    await sendMessage(payload); // ✅ Added await
+    await sendMessage(payload); 
     onCancelReply();
     handleRemoveImage();
     form.reset();
