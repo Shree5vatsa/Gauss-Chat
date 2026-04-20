@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Spinner } from "./ui/spinner";
 import { toast } from "sonner";
 import { API } from "@/lib/axios-client";
-import { Settings, User, Key, Trash2, Upload } from "lucide-react";
+import { Settings, User, Key, Upload } from "lucide-react";
 
 export const AccountSettingsModal = () => {
   const { user, logout } = useAuth();
