@@ -26,8 +26,9 @@ const FilterChip = ({ active, onClick, children, count }: FilterChipProps) => {
         "transition-all duration-200 ease-in-out",
         "flex items-center gap-1.5 whitespace-nowrap",
         "cursor-pointer select-none",
+        "hover:scale-105 active:scale-95", 
         active
-          ? "bg-primary text-primary-foreground shadow-sm"
+          ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
           : "bg-muted hover:bg-muted/80 text-muted-foreground",
       )}
     >

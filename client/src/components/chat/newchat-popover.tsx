@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from "react";
 import { useChat } from "@/hooks/useChat";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
-import { ArrowLeft, PenBoxIcon, Search, UsersIcon, Check } from "lucide-react";
+import { ArrowLeft, UserPlus, Search, UsersIcon, Check } from "lucide-react";
 import {
   InputGroup,
   InputGroupAddon,
@@ -108,9 +108,9 @@ export const NewChatPopover = memo(() => {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full hover:bg-primary/10"
+          className="h-9 w-9 rounded-full hover:bg-primary/10 cursor-pointer transition-all duration-200 active:scale-95"
         >
-          <PenBoxIcon className="!h-4 !w-4 !stroke-1.5" />
+          <UserPlus className="!h-5 !w-5 !stroke-1.5" />
         </Button>
       </PopoverTrigger>
 
@@ -161,9 +161,9 @@ export const NewChatPopover = memo(() => {
 
         {/* User List */}
         <div
-          className="flex-1 overflow-y-auto
-          px-2 py-2 space-y-1
-        "
+          className="flex-1 overflow-y-auto custom-scroll
+  px-2 py-2 space-y-1
+"
         >
           {isUsersLoading ? (
             <div className="flex items-center justify-center h-32">
@@ -175,8 +175,8 @@ export const NewChatPopover = memo(() => {
               <button
                 onClick={() => setIsGroupMode(true)}
                 className="w-full flex items-center gap-3 p-2 rounded-lg
-                  hover:bg-accent transition-colors
-                "
+          hover:bg-accent transition-colors
+        "
               >
                 <div className="bg-primary/10 p-2 rounded-full">
                   <UsersIcon className="size-4 text-primary" />
@@ -188,8 +188,8 @@ export const NewChatPopover = memo(() => {
               <button
                 onClick={() => handleCreateChat("ai")}
                 className="w-full flex items-center gap-3 p-2 rounded-lg
-                  hover:bg-accent transition-colors
-                "
+          hover:bg-accent transition-colors
+        "
               >
                 <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 p-2 rounded-full">
                   <img

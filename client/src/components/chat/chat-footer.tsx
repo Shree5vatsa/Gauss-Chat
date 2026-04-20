@@ -11,7 +11,7 @@ import { Input } from "../ui/input";
 import ChatReplyBar from "./chat-reply-bar";
 import { useChat } from "@/hooks/useChat";
 import { useSocket } from "@/hooks/useSocket";
-import { useAuth } from "@/hooks/useAuth"; // ✅ ADD THIS IMPORT
+import { useAuth } from "@/hooks/useAuth";
 
 interface Props {
   chatId: string | null;
@@ -32,11 +32,12 @@ const ChatFooter = ({
 
   const { sendMessage, isSendingMsg } = useChat();
   const { socket } = useSocket();
-  const { user } = useAuth(); // ✅ GET USER FROM AUTH
+  const { user } = useAuth();
 
   const [image, setImage] = useState<string | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const messageInputRef = useRef<HTMLInputElement | null>(null); 
 
   const form = useForm({
     resolver: zodResolver(messageSchema),
@@ -68,7 +69,6 @@ const ChatFooter = ({
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-    // ✅ SEND THE ACTUAL USER NAME, NOT THE ID
     const userName = user?.name || "Someone";
 
     socket.emit("typing:start", { chatId, userName });
@@ -78,7 +78,7 @@ const ChatFooter = ({
     }, 1500);
   };
 
-  const onSubmit = (values: { message?: string }) => {
+  const onSubmit = async (values: { message?: string }) => {
     if (isSendingMsg) return;
     if (!values.message?.trim() && !image) {
       toast.error("Please enter a message or select an image");
@@ -98,10 +98,15 @@ const ChatFooter = ({
       replyTo: replyTo,
     };
 
-    sendMessage(payload);
+    await sendMessage(payload); // ✅ Added await
     onCancelReply();
     handleRemoveImage();
     form.reset();
+
+    
+    setTimeout(() => {
+      messageInputRef.current?.focus();
+    }, 50);
   };
 
   return (
@@ -184,6 +189,7 @@ const ChatFooter = ({
                     autoComplete="off"
                     placeholder="Type a message..."
                     className="min-h-[40px] bg-background"
+                    ref={messageInputRef} 
                     onChange={(e) => {
                       field.onChange(e);
                       handleTyping();
