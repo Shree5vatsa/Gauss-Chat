@@ -13,7 +13,12 @@ export const setJwtAuthCookie = async ({ res, userId }: CookieParams) => {
   const token = jwt.sign({ userId }, Env.JWT_SECRET, {
     audience: ["user"],
     expiresIn: Env.JWT_EXPIRES_IN as Time,
-    // can specify: algorithm: "HS256"
+  });
+
+  console.log("🔵 Setting cookie with:", {
+    secure: Env.NODE_ENV === "production",
+    sameSite: "none",
+    NODE_ENV: Env.NODE_ENV,
   });
 
   return res.cookie("accessToken", token, {
