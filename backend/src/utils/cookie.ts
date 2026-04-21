@@ -19,7 +19,7 @@ export const setJwtAuthCookie = async ({ res, userId }: CookieParams) => {
   return res.cookie("accessToken", token, {
     httpOnly: true,
     secure: Env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   });
@@ -31,5 +31,5 @@ export const clearJwtAuthCookie = (res: Response) =>
     path: "/",
     httpOnly: true,
     secure: Env.NODE_ENV === "production",
-    sameSite: Env.NODE_ENV === "production" ? "strict" : "lax",
+    sameSite: "none",
   });
